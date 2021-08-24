@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <h1>recommend playlist</h1>
+  {% if playlists %}
+  <ul>
+    {% for playlist in playlists %}
+    <li>플레이리스트: {{playlist.id}}</li>
+    <li>노래: {{playlist.songs}}</li>
+    <li>태그: {{playlist.tags}}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</html>
