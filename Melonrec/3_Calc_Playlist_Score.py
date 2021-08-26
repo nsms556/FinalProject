@@ -7,67 +7,9 @@ from tqdm import tqdm
 import numpy as np
 
 from utils.arena_util import write_json, remove_seen, most_popular
-
-
-## 빠른 접근을 위한 Dictionary 생성
-def DicGenerator(train, song_meta):
-    # key: song / value: issue_date
-    song_issue_dic = defaultdict(lambda: '')
-
-    for i in range(len(song_meta)):
-        song_issue_dic[song_meta[i]['id']] = song_meta[i]['issue_date']
-
-    # key: song / value: artist_id_basket
-    song_artist_dic = defaultdict(lambda: [])
-
-    for i in range(len(song_meta)):
-        lt_art_id = song_meta[i]['artist_id_basket']
-        song_artist_dic[song_meta[i]['id']] = lt_art_id
-
-    # key: song / value: playlist
-    song_plylst_dic = defaultdict(lambda: [])
-
-    for i in range(len(train)):
-        for t_s in train[i]['songs']:
-            song_plylst_dic[t_s] += [train[i]['id']]
-
-    # key: song / value: tag
-    song_tag_dic = defaultdict(lambda: [])
-
-    for i in range(len(train)):
-        for t_s in train[i]['songs']:
-            song_tag_dic[t_s] += train[i]['tags']
-
-    # key: plylst / value: song
-    plylst_song_dic = defaultdict(lambda: [])
-
-    for i in range(len(train)):
-        plylst_song_dic[train[i]['id']] += train[i]['songs']
-
-    # key: plylst / value: tag
-    plylst_tag_dic = defaultdict(lambda: [])
-
-    for i in range(len(train)):
-        plylst_tag_dic[train[i]['id']] += train[i]['tags']
-
-    # key: tag / value: plylst
-    tag_plylst_dic = defaultdict(lambda: [])
-
-    for i in range(len(train)):
-        for t_q in train[i]['tags']:
-            tag_plylst_dic[t_q] += [train[i]['id']]
-
-    # key: tag / value: song
-    tag_song_dic = defaultdict(lambda: [])
-
-    for i in range(len(train)):
-        for t_q in train[i]['tags']:
-            tag_song_dic[t_q] += train[i]['songs']
-
-    return song_plylst_dic, song_tag_dic, plylst_song_dic, plylst_tag_dic, tag_plylst_dic, tag_song_dic, song_issue_dic, song_artist_dic
+from utils.custom_utils import DicGenerator
 
 ## 추천 함수
-
 '''
 input
  > train: 학습에 사용할 playlist들
@@ -78,7 +20,6 @@ input
 output
  > questions에 대한 최종 추천 리스트
 '''
-
 
 ## 2단계: 함수 정의
 # 1) Counter 객체에서 빈도수 기준 topk개 출력
@@ -218,7 +159,7 @@ def inference(song_mp, tag_mp, song_issue_dic, song_artist_dic, q, tag_song_C, s
     return song_candidate, tag_candidate
 
 
-def Recommender(train, questions, n_msp, n_mtp, mode, sim_measure, song_meta, freq_song, vocab_size, save=False):
+def Recommender(train, questions, n_msp, n_mtp, mode, sim_measure, song_meta, freq_song, save=False):
     ## 최종 추천리스트
     rec_list = []
 
@@ -238,7 +179,7 @@ def Recommender(train, questions, n_msp, n_mtp, mode, sim_measure, song_meta, fr
     '''
     sim_scores = np.load(f'scores/{mode}_scores_bias_{sim_measure}.npy', allow_pickle=True).item()
     gnr_scores = np.load(f'scores/{mode}_scores_bias_{sim_measure}_gnr.npy', allow_pickle=True).item()
-    title_scores = np.load(f'scores/{mode}_scores_title_{sim_measure}_{vocab_size}.npy', allow_pickle=True).item()
+    title_scores = np.load(f'scores/{mode}_scores_title_{sim_measure}.npy', allow_pickle=True).item()
 
     ## 3단계: 입력으로 들어온 questions 플레이리스트에 대해 추천
     for q in tqdm(questions):

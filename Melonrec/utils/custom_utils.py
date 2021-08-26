@@ -38,3 +38,60 @@ def mid_check(q_dataloader, model, tmp_result_path, answer_file_path, id2song_di
     write_json(elements, tmp_result_path)
     evaluator.evaluate(answer_file_path, tmp_result_path)
     os.remove(tmp_result_path)
+
+## 빠른 접근을 위한 Dictionary 생성
+def DicGenerator(train, song_meta):
+    # key: song / value: issue_date
+    song_issue_dic = defaultdict(lambda: '')
+
+    for i in range(len(song_meta)):
+        song_issue_dic[song_meta[i]['id']] = song_meta[i]['issue_date']
+
+    # key: song / value: artist_id_basket
+    song_artist_dic = defaultdict(lambda: [])
+
+    for i in range(len(song_meta)):
+        lt_art_id = song_meta[i]['artist_id_basket']
+        song_artist_dic[song_meta[i]['id']] = lt_art_id
+
+    # key: song / value: playlist
+    song_plylst_dic = defaultdict(lambda: [])
+
+    for i in range(len(train)):
+        for t_s in train[i]['songs']:
+            song_plylst_dic[t_s] += [train[i]['id']]
+
+    # key: song / value: tag
+    song_tag_dic = defaultdict(lambda: [])
+
+    for i in range(len(train)):
+        for t_s in train[i]['songs']:
+            song_tag_dic[t_s] += train[i]['tags']
+
+    # key: plylst / value: song
+    plylst_song_dic = defaultdict(lambda: [])
+
+    for i in range(len(train)):
+        plylst_song_dic[train[i]['id']] += train[i]['songs']
+
+    # key: plylst / value: tag
+    plylst_tag_dic = defaultdict(lambda: [])
+
+    for i in range(len(train)):
+        plylst_tag_dic[train[i]['id']] += train[i]['tags']
+
+    # key: tag / value: plylst
+    tag_plylst_dic = defaultdict(lambda: [])
+
+    for i in range(len(train)):
+        for t_q in train[i]['tags']:
+            tag_plylst_dic[t_q] += [train[i]['id']]
+
+    # key: tag / value: song
+    tag_song_dic = defaultdict(lambda: [])
+
+    for i in range(len(train)):
+        for t_q in train[i]['tags']:
+            tag_song_dic[t_q] += train[i]['songs']
+
+    return song_plylst_dic, song_tag_dic, plylst_song_dic, plylst_tag_dic, tag_plylst_dic, tag_song_dic, song_issue_dic, song_artist_dic
