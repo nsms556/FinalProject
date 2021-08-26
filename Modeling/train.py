@@ -5,17 +5,24 @@ import torch
 import torch.nn as nn
 import numpy as np
 from torch.utils.data import DataLoader
-from MelonDataset import SongTagDataset
-from Models import AutoEncoder
-from w2v import train_tokenizer_w2v
 
-from evaluate import ArenaEvaluator
-from data_util import tags_ids_convert, save_freq_song_id_dict, binary_songs2ids, binary_tags2ids
-from arena_util import load_json, write_json
+from MelonDataset import SongTagDataset
+
+# from Models import AutoEncoder
+from Embedding.autoencoder import AutoEncoder
+# from w2v import train_tokenizer_w2v
+from Embedding.word2vec import train_tokenizer_w2v
+# from evaluate import ArenaEvaluator
+from Metrics.evaluator import ArenaEvaluator
+# from arena_util import load_json, write_json
+from Utils import load_json, write_json
+# from data_util import tags_ids_convert, save_freq_song_id_dict, binary_songs2ids, binary_tags2ids
+from Utils import tags_ids_convert, save_freq_song_id_dict, binary_songs2ids, binary_tags2ids
+
 from tqdm import tqdm
 
 
-def train(train_dataset, model_file_path, id2prep_song_file_path, id2tag_file_path, question_dataset, answer_file_path):
+def train(train_dataset, question_dataset, model_file_path, id2tag_file_path, id2prep_song_file_path, answer_file_path):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     id2tag_dict = dict(np.load(id2tag_file_path, allow_pickle=True).item())
@@ -104,7 +111,7 @@ if __name__ == "__main__":
     # 하이퍼 파라미터 입력
     parser = argparse.ArgumentParser()
     parser.add_argument('-dimension', type=int, help="hidden layer dimension", default=450)
-    parser.add_argument('-epochs', type=int, help="total epochs", default=41)
+    parser.add_argument('-epochs', type=int, help="total epochs", default=40)
     parser.add_argument('-batch_size', type=int, help="batch size", default=256)
     parser.add_argument('-learning_rate', type=float, help="learning rate", default=0.0005)
     parser.add_argument('-dropout', type=float, help="dropout", default=0.2)
