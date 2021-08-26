@@ -22,17 +22,11 @@ from numpy import dot
 from numpy.linalg import norm
 from sklearn.metrics.pairwise import cosine_similarity
 from torch import nn
-from arena_util import write_json, load_json
+# from arena_util import write_json, load_json
+from Utils import load_json, write_json
 
 vocab_size = 24000
 method = 'bpe'
-
-
-def load_json(fname):
-    with open(fname, encoding='utf8') as f:
-        json_obj = json.load(f)
-
-    return json_obj
 
 
 def make_input4tokenizer(train_file_path, genre_file_path, result_file_path, valid_file_path=None, test_file_path=None):
