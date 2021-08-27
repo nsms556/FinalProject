@@ -9,21 +9,23 @@ import random
 import math
 import datetime as dt
 import distutils.dir_util
+from collections import defaultdict, Counter
+
 import numpy as np
++from numpy import dot
+from numpy.linalg import norm
 import pandas as pd
 import matplotlib.pyplot as plt
+
+from gensim.models import Word2Vec as w2v
+from torch import nn
+from sklearn.metrics.pairwise import cosine_similarity
 import sentencepiece as spm
 
-from collections import defaultdict
 from tqdm import tqdm
-from gensim.models import Word2Vec as w2v
-from collections import Counter
-from numpy import dot
-from numpy.linalg import norm
-from sklearn.metrics.pairwise import cosine_similarity
-from torch import nn
-# from arena_util import write_json, load_json
+
 from Utils import load_json, write_json
+
 
 vocab_size = 24000
 method = 'bpe'
