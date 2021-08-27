@@ -1,13 +1,11 @@
-import copy
-import random
 import datetime as dt
 from collections import Counter, defaultdict
 from tqdm import tqdm
 
 import numpy as np
 
-from utils.arena_util import write_json, remove_seen, most_popular
-from utils.custom_utils import DicGenerator
+from Utils.file import write_json
+from Utils.preprocessing import DicGenerator, remove_seen, most_popular
 
 ## 추천 함수
 '''

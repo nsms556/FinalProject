@@ -5,8 +5,8 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 
-from utils.arena_util import load_json
-from utils.models import Kakao_Tokenizer, Str2Vec
+from Utils.file import load_json
+from Utils.models import Kakao_Tokenizer, Str2Vec
 
 class Word2VecHandler :
     def __init__(self, model_postfix) :

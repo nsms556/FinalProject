@@ -1,3 +1,4 @@
+from Melonrec.utils.file import remove_file
 import os
 import sys
 import argparse
@@ -10,16 +11,18 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from utils.arena_util import load_json
-from utils.MelonDataset import SongTagDataset, SongTagGenreDataset
-from utils.data_util import tags_encoding, song_filter_by_freq
-from utils.custom_utils import tmp_file_remove, mid_check
-from utils.models import AutoEncoder
+from Utils.dataset import SongTagDataset, SongTagGenreDataset
+from Utils.models import AutoEncoder
+
+from Utils.file import load_json
+from Utils.preprocessing import tags_encoding, song_filter_by_freq
+from Utils.evaluate import mid_check
         
 class AutoEncoderHandler :
     def __init__(self, model_path:str) -> None:
         self.model = self.set_model(model_path)
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.is_cuda = torch.cuda.is_available()
+        self.device = 'cuda' if self.is_cuda else 'cpu'
 
     def __init__(self, args) -> None:
         self.H = args.dimension
@@ -29,8 +32,9 @@ class AutoEncoderHandler :
         self.dropout = args.dropout
         self.num_workers = args.num_workers
         self.mode = args.mode
-
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        
+        self.is_cuda = torch.cuda.is_available()
+        self.device = 'cuda' if self.is_cuda else 'cpu'
         self.model = None
 
     def create_autoencoder(self, D_in, D_out) :
@@ -72,7 +76,7 @@ class AutoEncoderHandler :
             pass
 
         temp_fn = 'arena_data/answers/temp.json'
-        tmp_file_remove(temp_fn)
+        remove_file(temp_fn)
 
         for epoch in range(args.epochs) :
             print('epoch : {}'.format(epoch))
@@ -95,7 +99,7 @@ class AutoEncoderHandler :
             torch.save(model, autoencoder_model_path)
 
             if args.mode == 0 & epoch % check_every == 0 :
-                mid_check(q_dataloader, model, tmp_result_path, answer_file_path, id2song_dict, id2tag_dict, is_cuda, num_songs)
+                mid_check(q_dataloader, model, tmp_result_path, answer_file_path, id2song_dict, id2tag_dict, self.is_cuda, num_songs)
 
     def autoencoder_plylsts_embeddings(self, _model_file_path, _submit_type, genre=False, use_exist=True):
         if _submit_type == 'val':

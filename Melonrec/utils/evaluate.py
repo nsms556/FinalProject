@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 import fire
+from tqdm import tqdm
+
 import numpy as np
 
-from utils.arena_util import load_json
+import torch
+
+from utils.file import remove_file, load_json, write_json
+from utils.preprocessing import binary_songs2ids, binary_tags2ids
 
 
 class ArenaEvaluator:
@@ -83,6 +88,33 @@ class ArenaEvaluator:
         print(f"Score: {score:.6}")
         # except Exception as e:
         #     print(e)
+
+def mid_check(q_dataloader, model, tmp_result_path, answer_file_path, id2song_dict, id2tag_dict, is_cuda, num_songs) :
+    evaluator = ArenaEvaluator()
+    device = 'cuda' if is_cuda else 'cpu'
+
+    remove_file(tmp_result_path)
+
+    elements =[]
+    for idx, (_id, _data) in tqdm(enumerate(q_dataloader), desc='testing...') :
+        with torch.no_grad() :
+            _data = _data.to(device)
+            output = model(_data)
+
+        songs_input, tags_input = torch.split(_data, num_songs, dim=1)
+        songs_output, tags_output = torch.split(output, num_songs, dim=1)
+
+        songs_ids = binary_songs2ids(songs_input, songs_output, id2song_dict)
+        tags_ids = binary_tags2ids(tags_input, tags_output, id2tag_dict)
+
+        _id = list(map(int, _id))
+        for i in range(len(_id)) :
+            element = {'id':_id[i], 'songs':list(songs_ids[i]), 'tags':tags_ids[i]}
+            elements.append(element)
+    
+    write_json(elements, tmp_result_path)
+    evaluator.evaluate(answer_file_path, tmp_result_path)
+    remove_file(tmp_result_path)
 
 
 if __name__ == "__main__":
