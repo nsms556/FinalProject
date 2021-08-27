@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
+
+import torch
 from torch.utils.data import Dataset
+
 from utils.arena_util import load_json
 from utils.data_util import genre_gn_all_preprocessing, genre_DicGenerator
-import torch
 
 
 class SongTagDataset(Dataset):
@@ -44,7 +46,6 @@ class SongTagDataset(Dataset):
         bin_vec = np.zeros(self.num_tags)
         bin_vec[tags] = 1
         return np.array(bin_vec)
-
 
 class SongTagGenreDataset(Dataset):
     def __init__(self, json_dataset, tag2id_file_path, prep_song2id_file_path):
