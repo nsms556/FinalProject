@@ -4,8 +4,8 @@ from tqdm import tqdm
 
 import numpy as np
 
-from utils.file import write_json
-from utils.preprocessing import DicGenerator, remove_seen, most_popular
+from Utils.file import write_json
+from Utils.preprocessing import DicGenerator, remove_seen, most_popular
 
 ## 추천 함수
 '''

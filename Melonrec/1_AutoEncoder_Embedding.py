@@ -11,12 +11,12 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from utils.dataset import SongTagDataset, SongTagGenreDataset
-from utils.models import AutoEncoder
+from Utils.dataset import SongTagDataset, SongTagGenreDataset
+from Utils.models import AutoEncoder
 
-from utils.file import load_json
-from utils.preprocessing import tags_encoding, song_filter_by_freq
-from utils.evaluate import mid_check
+from Utils.file import load_json
+from Utils.preprocessing import tags_encoding, song_filter_by_freq
+from Utils.evaluate import mid_check
         
 class AutoEncoderHandler :
     def __init__(self, model_path:str) -> None:
