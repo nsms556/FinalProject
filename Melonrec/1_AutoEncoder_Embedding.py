@@ -11,7 +11,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 from utils.arena_util import load_json
-from utils.MelonDataset import SongTagDataset, SongTagGenreDataset
+from utils.dataset import SongTagDataset, SongTagGenreDataset
 from utils.data_util import tags_encoding, song_filter_by_freq
 from utils.custom_utils import tmp_file_remove, mid_check
 from utils.models import AutoEncoder

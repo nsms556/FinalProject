@@ -8,10 +8,9 @@ import torch
 import torch.nn as nn
 
 from utils.arena_util import load_json
-from utils.static import is_cuda
 
 
-device = 'cuda' if is_cuda else 'cpu'
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def pcc(_x, _y):
     vx = _x - torch.mean(_x)
