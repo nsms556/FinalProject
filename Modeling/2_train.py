@@ -5,26 +5,23 @@ import torch
 import torch.nn as nn
 import numpy as np
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
+# Dataset
 from MelonDataset import SongTagDataset
 
-# from Models import AutoEncoder
+# Modules
 from Embedding.autoencoder import AutoEncoder
-# from w2v import train_tokenizer_w2v
 from Embedding.word2vec import train_tokenizer_w2v
-# from evaluate import ArenaEvaluator
 from Metrics.evaluator import ArenaEvaluator
-# from arena_util import load_json, write_json
 from Utils import load_json, write_json
-# from data_util import tags_ids_convert, save_freq_song_id_dict, binary_songs2ids, binary_tags2ids
 from Utils import tags_ids_convert, save_freq_song_id_dict, binary_songs2ids, binary_tags2ids
-
-from tqdm import tqdm
 
 
 def train(train_dataset, question_dataset, model_file_path, id2tag_file_path, id2prep_song_file_path, answer_file_path):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
+    # hashing
     id2tag_dict = dict(np.load(id2tag_file_path, allow_pickle=True).item())
     id2prep_song_dict = dict(np.load(id2prep_song_file_path, allow_pickle=True).item())
     
@@ -166,7 +163,8 @@ if __name__ == "__main__":
     else:
         print('mode error! local_val: 0, val: 1, test: 2')
         sys.exit(1)
-    
+        
+    '''
     # Autoencoder의 input: song, tag binary vector의 concatenate, tags는 str이므로 id로 변형할 필요 있음
     tag2id_file_path = f'{default_file_path}/tag2id_{model_postfix}.npy'
     id2tag_file_path = f'{default_file_path}/id2tag_{model_postfix}.npy'
@@ -179,6 +177,7 @@ if __name__ == "__main__":
     
     if not (os.path.exists(prep_song2id_file_path) & os.path.exists(id2prep_song_file_path)):
         save_freq_song_id_dict(train_data, freq_thr, default_file_path, model_postfix)
+    '''
     
     train_dataset = SongTagDataset(train_data, tag2id_file_path, prep_song2id_file_path)
     if question_data is not None:
