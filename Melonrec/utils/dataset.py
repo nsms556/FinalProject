@@ -4,8 +4,8 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from utils.arena_util import load_json
-from utils.data_util import genre_gn_all_preprocessing, genre_DicGenerator
+from Utils.file import load_json
+from Utils.preprocessing import genre_gn_all_preprocessing, genre_DicGenerator
 
 
 class SongTagDataset(Dataset):

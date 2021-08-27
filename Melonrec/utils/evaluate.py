@@ -6,8 +6,8 @@ import numpy as np
 
 import torch
 
-from utils.file import remove_file, load_json, write_json
-from utils.preprocessing import binary_songs2ids, binary_tags2ids
+from Utils.file import remove_file, load_json, write_json
+from Utils.preprocessing import binary_songs2ids, binary_tags2ids
 
 
 class ArenaEvaluator:

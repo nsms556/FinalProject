@@ -3,10 +3,10 @@ import copy
 import random
 
 import fire
+
 import numpy as np
 
-from arena_util import load_json
-from arena_util import write_json
+from Utils.file import load_json, write_json
 
 
 class ArenaSplitter:
