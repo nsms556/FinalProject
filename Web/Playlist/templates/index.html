@@ -4,8 +4,9 @@
   {% if playlists %}
   <ul>
     {% for playlist in playlists %}
+    <hr />
     <li>플레이리스트: {{playlist.id}}</li>
-    <li>노래: {{playlist.songs}}</li>
+    <li style="display: none">노래: {{playlist.songs}}</li>
     <li>태그: {{playlist.tags}}</li>
     {% endfor %}
   </ul>
