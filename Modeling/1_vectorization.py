@@ -10,40 +10,8 @@ from tqdm import tqdm
 
 from Utils import tags_ids_convert, save_freq_song_id_dict
 
-
-class TitleTokenizer:
-    def __init__(self):
-        pass
-    
-    def make_input_file(self, input_fn, sentences):
-        with open(input_fm, 'w', encoding='utf8') as f:
-            for sentence in sentences:
-                f.write(sentence + '\n')
-    
-    def train_tokenizer(self, input_fn, prefix, vocab_size, model_type):
-        templates = '--input={} --pad_id=0 --bos_id=1 --eos_id=2 --unk_id=3 --model_prefix={} --vocab_size={} --character_coverage=1.0 --model_type={}'
-        cmd = templates.format(
-            input_fn,
-            prefix,
-            vocab_size,
-            model_type
-        )
-        
-        spm.SentencePieceTrainer.Train(cmd)
-        print(f"tokenizer model {prefix}.model is trained")
-    
-    def get_tokens(self, sp, sentences):
-        tokenized_sentences = []
-        for sentence in sentences:
-            tokens = sp.EncodeAsPieces(sentence)
-            new_tokens = []
-            for token in tokens:
-                token = token.replace("_", "")
-                if len(token) > 1:
-                    new_tokens.append(token)
-            if len(new_tokens) > 1:
-                tokenized_sentences.append(new_tokens)
-        return tokenized_sentences
+from .Embedding.autoencoder import AutoEncoder, train_autoencoder
+# from .Embedding.word2vec import
 
 
 if __name__ == "__main__":
@@ -71,7 +39,7 @@ if __name__ == "__main__":
     mode = args.mode
     
     # 1. Embedding 준비
-    
+    default_file_path = "./Results"
     # 1-1. tag2id & id2tag
     # Autoencoder의 input: song, tag binary vector의 concatenate, tags는 str이므로 id로 변형할 필요 있음
     tag2id_file_path = f'{default_file_path}/tag2id_{model_postfix}.npy'
@@ -90,8 +58,8 @@ if __name__ == "__main__":
     if not (os.path.exists(prep_song2id_file_path) & os.path.exists(id2prep_song_file_path)):
         save_freq_song_id_dict(train_data, freq_thr, default_file_path, model_postfix)
 
+
     # 2. Embedding 실행
-    
     # 2-0. dataset
     train_dataset = SongTagDataset(train_data, tag2id_file_path, prep_song2id_file_path)
     if question_data is not None:
@@ -100,8 +68,9 @@ if __name__ == "__main__":
     # 2-1. Song One-hot Vector
     # autoencoder model
     model_file_path = f'model/autoencoder_{H}_{batch_size}_{learning_rate}_{dropout}_{freq_thr}_{model_postfix}'
-
-    train(train_dataset, model_file_path, id2prep_song_file_path, id2tag_file_path, question_dataset, answer_file_path)
+    
+    # train
+    train_autoencoder(train_dataset, model_file_path, id2prep_song_file_path, id2tag_file_path, question_dataset, answer_file_path)
     
     # 2-2. Tag One-hot Vector
     # word2vec
@@ -144,6 +113,7 @@ if __name__ == "__main__":
         test = load_json(test_file_path)
         train = train + val
         question = test
-
-    train_tokenizer_w2v(train_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path,
+        
+    # train
+    train_word2vec(train_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path,
                         model_postfix)
