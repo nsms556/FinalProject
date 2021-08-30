@@ -71,12 +71,14 @@ class Word2VecHandler :
         return sentences
 
     def train_vectorizer(self, train_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path, exist_tags_only=True):
+        print('Make Sentences')
         sentences = self.make_input4tokenizer(
             train_file_path, genre_file_path, tokenize_input_file_path, val_file_path, test_file_path)
 
         if not sentences:
           sys.exit(1)
-
+        
+        print('Tokenizing')
         if exist_tags_only :    # kakao filtered #
             tokenized_sentences = self.tokenizer.sentences_to_tokens(sentences, self.tokenizer.get_all_tags(pd.read_json(train_file_path)))
         else :                  # kakao non-filtered #
@@ -112,7 +114,7 @@ class Word2VecHandler :
             word_embs = []
             for p_word in p_words:
                 try:
-                    word_embs.append(self.w2v.model.wv[p_word])
+                    word_embs.append(self.vectorizer.model.wv[p_word])
                 except KeyError:
                     pass
 
@@ -139,7 +141,7 @@ class Word2VecHandler :
             word_embs = []
             for p_word in p_words:
                 try:
-                    word_embs.append(self.w2v.model.wv[p_word])
+                    word_embs.append(self.vectorizer.model.wv[p_word])
                 except KeyError:
                     pass
             if len(word_embs):
@@ -197,7 +199,7 @@ if __name__ == '__main__':
         default_file_path = 'res'
         model_postfix = 'test'
 
-    if args.exist_filter == 'N':
+    if args.exist_tags_only== 'N':
         exist_filter = False
     else :
         exist_filter = True
@@ -206,7 +208,7 @@ if __name__ == '__main__':
         get_file_paths(model_postfix)
     
     handler = Word2VecHandler(model_postfix)
-    handler.train_vectorizer(train_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path, model_postfix, exist_filter)
+    handler.train_vectorizer(train_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path, exist_filter)
 
     if model_postfix == 'local_val':
         train = load_json(train_file_path)
