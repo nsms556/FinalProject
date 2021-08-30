@@ -1,4 +1,3 @@
-from Melonrec.utils.file import remove_file
 import os
 import sys
 import argparse
@@ -14,15 +13,16 @@ from torch.utils.data import DataLoader
 from Utils.dataset import SongTagDataset, SongTagGenreDataset
 from Utils.models import AutoEncoder
 
-from Utils.file import load_json
+from Utils.file import load_json, remove_file
 from Utils.preprocessing import tags_encoding, song_filter_by_freq
 from Utils.evaluate import mid_check
-        
+
+
 class AutoEncoderHandler :
     def __init__(self, model_path:str) -> None:
-        self.model = self.set_model(model_path)
         self.is_cuda = torch.cuda.is_available()
         self.device = 'cuda' if self.is_cuda else 'cpu'
+        self.load_model(model_path)
 
     def __init__(self, args) -> None:
         self.H = args.dimension
@@ -42,9 +42,11 @@ class AutoEncoderHandler :
 
         return self.model
 
-    def set_model(self, model_path) :
-        model = torch.load(model_path)
-        return model
+    def load_model(self, model_path) :
+        self.model = torch.load(model_path)
+        
+    def export_model(self, model_path) :
+        torch.save(self.model, model_path)
 
     def train_autoencoder(self, train_dataset, autoencoder_model_path, id2song_file_path, id2tag_file_path, question_dataset, answer_file_path) :
         id2tag_dict = dict(np.load(id2tag_file_path, allow_pickle=True).item())
@@ -52,7 +54,7 @@ class AutoEncoderHandler :
 
         num_songs = train_dataset.num_songs
         num_tags = train_dataset.num_tags
-
+        print(num_songs, num_tags)
         D_in = D_out = num_songs + num_tags
 
         q_dataloader = None
@@ -96,9 +98,10 @@ class AutoEncoderHandler :
 
             print('loss: {:.4f} \n'.format(running_loss))
 
-            torch.save(model, autoencoder_model_path)
+            self.export_model(autoencoder_model_path)
+            #torch.save(model, autoencoder_model_path)
 
-            if args.mode == 0 & epoch % check_every == 0 :
+            if args.mode == 0 & epoch % check_every == 0 & question_dataset is not None :
                 mid_check(q_dataloader, model, tmp_result_path, answer_file_path, id2song_dict, id2tag_dict, self.is_cuda, num_songs)
 
     def autoencoder_plylsts_embeddings(self, _model_file_path, _submit_type, genre=False, use_exist=True):
@@ -138,9 +141,9 @@ class AutoEncoderHandler :
         model_file_path = _model_file_path
 
         if use_exist :
-            model = self.set_model(model_file_path)
-        else :
-            model = self.model
+            self.load_model(model_file_path)
+        
+        model = self.model
         for name, param in model.named_parameters():
             if param.requires_grad:
                 if name == 'encoder.1.weight':
