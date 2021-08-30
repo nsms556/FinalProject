@@ -1,13 +1,15 @@
-.idea/
+# Folder #
 model/
 arena_data/
-t_arena_data/
+results/
+original/
+.idea/
 __pycache__/
+
+# File #
 .ipynb_checkpoints/test-checkpoint.ipynb
 *.ipynb
-results/
 *.bat
 *.zip
 *.npy
 *.json
-original/
