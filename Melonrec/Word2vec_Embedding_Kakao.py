@@ -7,15 +7,14 @@ import pandas as pd
 
 from Utils.file import load_json
 from Models.word2vec import Kakao_Tokenizer, Str2Vec
-
+from Utils.static import *
 
 class Word2VecHandler :
-    def __init__(self, model_postfix) :
+    def __init__(self) :
         self.tokenizer = Kakao_Tokenizer()
         self.vectorizer = None
-        self.model_postfix = model_postfix
 
-    def make_input4tokenizer(self, train_file_path, genre_file_path, tokenize_input_file_path, val_file_path=None, test_file_path=None):
+    def make_input4tokenizer(self, train_file_path, genre_file_path):
         def _wv_genre(genre):
             genre_dict = dict()
             for code, value in genre:
@@ -40,10 +39,6 @@ class Word2VecHandler :
 
         try:
             playlists = load_json(train_file_path)
-            if val_file_path is not None:
-                playlists += load_json(val_file_path)
-            if test_file_path is not None:
-                playlists += load_json(test_file_path)
 
             genre_all = load_json(genre_file_path)
             genre_all_lists = []
@@ -61,23 +56,17 @@ class Word2VecHandler :
                 sentences.append(' '.join([title_stc, tag_stc, date_stc]))
 
             sentences = sentences + genre_stc
-            
-            with open(tokenize_input_file_path, 'w', encoding='utf8') as f:
-                for sentence in sentences:
-                    f.write(sentence + '\n')
         except Exception as e:
             print(e.with_traceback())
             return False
 
         return sentences
 
-    def train_vectorizer(self, train_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path, exist_tags_only=True):
+    def train_vectorizer(self, train_file_path, genre_file_path, exist_tags_only=True):
         print('Make Sentences')
-        sentences = self.make_input4tokenizer(
-            train_file_path, genre_file_path, tokenize_input_file_path, val_file_path, test_file_path)
-
+        sentences = self.make_input4tokenizer(train_file_path, genre_file_path)
         if not sentences:
-          sys.exit(1)
+            raise Exception('Sentences not found')
         
         print('Tokenizing')
         if exist_tags_only :    # kakao filtered #
@@ -89,16 +78,18 @@ class Word2VecHandler :
         print("start train_vectorizer.... name : {}".format(vectorizer_name))
 
         self.vectorizer = Str2Vec(tokenized_sentences, size=200, window=5, min_count=1, workers=8, sg=1, hs=1)
-        
-        #print(self.vectorizer.model.wv)
-        self.vectorizer.save_model(vectorizer_name)
 
-    def get_plylsts_embeddings(self, train_data, question_data, _submit_type):
+    def get_plylsts_embeddings(self,playlist_data, exist=None, train=True):
         print('saving embeddings')
+        if train :
+            t_plylst_title_tag_emb = {}  # plylst_id - vector dictionary
+        else :
+            if exist is not None :
+                t_plylst_title_tag_emb = exist
+            else :
+                t_plylst_title_tag_emb = dict(np.load(plylst_w2v_emb_path, allow_pickle=True).item())
 
-        # train plylsts to vectors
-        t_plylst_title_tag_emb = {}  # plylst_id - vector dictionary
-        for plylst in tqdm(train_data):
+        for plylst in tqdm(playlist_data):
             p_id = plylst['id']
 
             p_title = plylst['plylst_title']
@@ -124,109 +115,62 @@ class Word2VecHandler :
             else:
                 p_emb = np.zeros(200).tolist()
 
-            t_plylst_title_tag_emb[p_id] = p_emb
-
-        # val plylsts to vectors
-        for plylst in tqdm(question_data):
-            p_id = plylst['id']
-            p_title = plylst['plylst_title']
-            p_title_tokens = self.tokenizer.sentences_to_tokens([p_title])
-            p_songs = plylst['songs']
-            if len(p_title_tokens):
-                p_title_tokens = p_title_tokens[0]
-            else:
-                p_title_tokens = []
-            p_tags = plylst['tags']
-            p_times = plylst['updt_date'][:7].split('-')
-            p_words = p_title_tokens + p_tags + p_times
-            word_embs = []
-            for p_word in p_words:
-                try:
-                    word_embs.append(self.vectorizer.model.wv[p_word])
-                except KeyError:
-                    pass
-            if len(word_embs):
-                p_emb = np.average(word_embs, axis=0).tolist()
-            else:
-                p_emb = np.zeros(200).tolist()
             t_plylst_title_tag_emb[p_id] = p_emb
 
         return t_plylst_title_tag_emb
 
+'''
+    def get_file_paths(model_postfix):
+        genre_file_path = 'res/genre_gn_all.json'
+        tokenize_input_file_path = f'model/tokenizer_input_{model_postfix}.txt'
 
-def get_file_paths(model_postfix):
-    genre_file_path = 'res/genre_gn_all.json'
-    tokenize_input_file_path = f'model/tokenizer_input_{model_postfix}.txt'
+        if model_postfix == 'val':
+            default_file_path = 'res'
+            train_file_path = 'res/train.json'
+            question_file_path = 'res/val.json'
+            val_file_path = question_file_path
+            test_file_path = None
 
-    if model_postfix == 'val':
-        default_file_path = 'res'
-        train_file_path = 'res/train.json'
-        question_file_path = 'res/val.json'
-        val_file_path = question_file_path
-        test_file_path = None
+        elif model_postfix == 'test':
+            default_file_path = 'res'
+            train_file_path = 'res/train.json'
+            question_file_path = 'res/test.json'
+            val_file_path = 'res/val.json'
+            test_file_path = question_file_path
 
-    elif model_postfix == 'test':
-        default_file_path = 'res'
-        train_file_path = 'res/train.json'
-        question_file_path = 'res/test.json'
-        val_file_path = 'res/val.json'
-        test_file_path = question_file_path
+        elif model_postfix == 'local_val':
+            default_file_path = 'arena_data'
+            train_file_path = f'{default_file_path}/orig/train.json'
+            question_file_path = f'{default_file_path}/questions/val.json'
+            val_file_path = None
+            test_file_path = None
 
-    elif model_postfix == 'local_val':
-        default_file_path = 'arena_data'
-        train_file_path = f'{default_file_path}/orig/train.json'
-        question_file_path = f'{default_file_path}/questions/val.json'
-        val_file_path = None
-        test_file_path = None
-
-    return train_file_path, question_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path
-
+        return train_file_path, question_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path
+'''
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-mode', type=int, help="local_val: 0, val: 1, test: 2", default=2)
     parser.add_argument('-exist_tags_only', type=str, help="Y/N", default='Y')
     
     args = parser.parse_args()
     print(args)
 
-    if args.mode == 0:
-        default_file_path = 'arena_data'
-        model_postfix = 'local_val'
-    elif args.mode == 1:
-        default_file_path = 'res'
-        model_postfix = 'val'
-    elif args.mode == 2:
-        default_file_path = 'res'
-        model_postfix = 'test'
+    default_file_path = 'Data'
 
     if args.exist_tags_only== 'N':
         exist_filter = False
     else :
         exist_filter = True
     
-    train_file_path, question_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path = \
-        get_file_paths(model_postfix)
-    
-    handler = Word2VecHandler(model_postfix)
-    handler.train_vectorizer(train_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path, exist_filter)
+    handler = Word2VecHandler()
+    handler.train_vectorizer(train_file_path, genre_meta_file_path, exist_filter)
 
-    if model_postfix == 'local_val':
-        train = load_json(train_file_path)
-        question = load_json(question_file_path)
-    elif model_postfix == 'val':
-        train = load_json(train_file_path)
-        question = load_json(question_file_path)
-    elif model_postfix == 'test':
-        train = load_json(train_file_path)
-        val = load_json(val_file_path)
-        test = load_json(test_file_path)
-        train = train + val
-        question = test
+    train = load_json(train_file_path)
+    question = load_json(question_file_path)
 
-    plylst_title_tag_emb = handler.get_plylsts_embeddings(train, question, model_postfix)
+    plylst_title_tag_emb = handler.get_plylsts_embeddings(train, train=True)
+    plylst_title_tag_emb = handler.get_plylsts_embeddings(question, exist=plylst_title_tag_emb, train=False)
 
-    np.save('{}/plylst_w2v_emb.npy'.format(default_file_path),
-            plylst_title_tag_emb)
+    np.save(plylst_w2v_emb_path, plylst_title_tag_emb)
 
     print('Word2Vec Embedding Complete')
