@@ -79,7 +79,7 @@ class AutoEncoderHandler :
 
             print('loss: {:.4f} \n'.format(running_loss))
 
-            if args.mode == 0 & epoch % check_every == 0 & question_dataset is not None :
+            if epoch % check_every == 0 and question_dataset is not None :
                 mid_check(q_dataloader, self.model, tmp_results_path, answer_file_path, id2song_dict, id2tag_dict, self.is_cuda, num_songs)
 
     def autoencoder_plylsts_embeddings(self, playlist_data, genre=False, train=True):

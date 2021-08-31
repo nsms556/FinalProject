@@ -24,14 +24,13 @@ if __name__ == '__main__' :
 
     args = parser.parse_args()
 
+    print('Load data')
     train_data = load_json(train_file_path)
     question_data = load_json(question_file_path)
     answer_data = load_json(answer_file_path)
 
-    autoencoder_path = autoencoder_model_path.format(
-        args.dimension, args.batch_size, args.learning_rate, args.dropout, args.freq_thr)
-
-    autoencoder_handler = AutoEncoderHandler(args)
+    print('Create Embedding Handlers')
+    autoencoder_handler = AutoEncoderHandler()
     word2vec_handler = Word2VecHandler()
 
     if not (os.path.exists(tag2id_file_path) and os.path.exists(id2song_file_path)) :
@@ -44,6 +43,8 @@ if __name__ == '__main__' :
     question_dataset = SongTagDataset(question_data, tag2id_file_path, song2id_file_path)
 
     autoencoder_handler.train_autoencoder(train_dataset, id2song_file_path, id2tag_file_path, question_dataset, answer_file_path, args)
+
+    autoencoder_path = autoencoder_model_path.format(args.dimension, args.batch_size, args.learning_rate, args.dropout, args.freq_thr)
     autoencoder_handler.save_model(autoencoder_path)
 
     word2vec_handler.train_vectorizer(train_file_path, genre_meta_file_path, True)
