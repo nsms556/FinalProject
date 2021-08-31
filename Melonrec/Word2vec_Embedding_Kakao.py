@@ -6,7 +6,8 @@ import numpy as np
 import pandas as pd
 
 from Utils.file import load_json
-from Utils.models import Kakao_Tokenizer, Str2Vec
+from Models.word2vec import Kakao_Tokenizer, Str2Vec
+
 
 class Word2VecHandler :
     def __init__(self, model_postfix) :
@@ -89,7 +90,7 @@ class Word2VecHandler :
 
         self.vectorizer = Str2Vec(tokenized_sentences, size=200, window=5, min_count=1, workers=8, sg=1, hs=1)
         
-        print(self.vectorizer.model.wv)
+        #print(self.vectorizer.model.wv)
         self.vectorizer.save_model(vectorizer_name)
 
     def get_plylsts_embeddings(self, train_data, question_data, _submit_type):

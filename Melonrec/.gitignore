@@ -1,10 +1,11 @@
 # Folder #
-model/
-arena_data/
-results/
-original/
+Model/
+Arena_data/
+Results/
+Original/
 .idea/
 __pycache__/
+Weights/
 
 # File #
 .ipynb_checkpoints/test-checkpoint.ipynb

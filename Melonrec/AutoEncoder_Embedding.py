@@ -10,13 +10,13 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from Utils.dataset import SongTagDataset, SongTagGenreDataset
-from Utils.models import AutoEncoder
+from Models.dataset import SongTagDataset, SongTagGenreDataset
+from Models.autoencoder import AutoEncoder
 
 from Utils.file import load_json, remove_file
 from Utils.preprocessing import tags_encoding, song_filter_by_freq
 from Utils.evaluate import mid_check
-
+import Utils.static as static
 
 class AutoEncoderHandler :
     def __init__(self, model_path:str) -> None:
@@ -99,7 +99,6 @@ class AutoEncoderHandler :
             print('loss: {:.4f} \n'.format(running_loss))
 
             self.export_model(autoencoder_model_path)
-            #torch.save(model, autoencoder_model_path)
 
             if args.mode == 0 & epoch % check_every == 0 & question_dataset is not None :
                 mid_check(q_dataloader, model, tmp_result_path, answer_file_path, id2song_dict, id2tag_dict, self.is_cuda, num_songs)
@@ -247,7 +246,6 @@ if __name__ == '__main__' :
     parser.add_argument('-dropout', type=float, help="dropout", default=0.2)
     parser.add_argument('-num_workers', type=int, help="num workers", default=4)
     parser.add_argument('-freq_thr', type=float, help="frequency threshold", default=2)
-    parser.add_argument('-mode', type=int, help="local_val: 0, val: 1, test: 2", default=2)
 
     args = parser.parse_args()
     print(args)
