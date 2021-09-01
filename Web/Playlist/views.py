@@ -11,6 +11,7 @@ import numpy as np
 from torch.utils.data import DataLoader
 
 from Playlist.recommend import inference
+from Utils.dataset import SongTagDataset
 
 # Create your views here.
 @method_decorator(csrf_exempt, name='dispatch')
@@ -72,8 +73,9 @@ def show_inference(request):
         id2song_dict = dict(np.load(id2song_file_path, allow_pickle=True).item())
 
         model = torch.load(model_path, map_location=torch.device('cpu'))
-
+        model.eval()
         question_dataset = body
+        question_dataset = SongTagDataset(question_dataset, tag2id_file_path, prep_song2id_file_path)
         question_dataloader = DataLoader(question_dataset, shuffle=True, batch_size=256, num_workers=8)
 
         output = inference(question_dataloader, model, result_path, id2song_dict, id2tag_dict)
