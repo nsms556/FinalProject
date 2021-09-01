@@ -21,8 +21,17 @@ import Profile from "views/examples/Profile.js";
 import Register from "views/examples/Register.js";
 import Login from "views/examples/Login.js";
 
+import PlaylistPage from "views/PlaylistPage/PlaylistPage";
+
 
 let routes = [
+    {
+        path: "/playlist",
+        name: "Playlist",
+        icon: "ni ni-favourite-28 text-danger",
+        component: PlaylistPage,
+        layout: "/admin",
+    },
     {
         path: "/index",
         name: "",
