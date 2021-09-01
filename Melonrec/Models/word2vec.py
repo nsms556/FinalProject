@@ -62,11 +62,16 @@ class Kakao_Tokenizer :
         return tokenized_stc
 
 class Str2Vec :
-    def __init__(self, train_data, size=200, window=5, min_count=2, workers=8, sg=1, hs=1):
+    def __init__(self, train_data=None, size=200, window=5, min_count=2, workers=8, sg=1, hs=1):
         self.model = Word2Vec(size=size, window=window, min_count=min_count, workers=workers, sg=sg, hs=hs)
+        
+        if train_data != None :
+            self.build_vocab(train_data)
+
+    def build_vocab(self, train_data) :
         self.model.build_vocab(train_data)
 
-    def set_model(self, model_fn):
+    def load_model(self, model_fn):
         self.model = Word2Vec.load(model_fn)
 
     def save_embeddings(self, emb_fn):
@@ -85,8 +90,7 @@ class Str2Vec :
         df.to_csv(emb_fn, index=False)
 
     def save_model(self, md_fn):
-        self.model.save(md_fn)
-        print("word embedding model {} is trained".format(md_fn))
+        self.model.wv.save_word2vec_format(md_fn)
 
     def show_similar_words(self, word, topn):
         print(self.model.most_similar(positive=[word], topn=topn))

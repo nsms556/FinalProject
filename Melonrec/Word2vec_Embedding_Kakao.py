@@ -10,9 +10,12 @@ from Models.word2vec import Kakao_Tokenizer, Str2Vec
 from Utils.static import *
 
 class Word2VecHandler :
-    def __init__(self) :
+    def __init__(self, model_path) :
         self.tokenizer = Kakao_Tokenizer()
-        self.vectorizer = None
+        self.vectorizer = Str2Vec()
+
+        if model_path != None :
+            self.vectorizer.load_model(model_path)
 
     def make_input4tokenizer(self, train_file_path, genre_file_path):
         def _wv_genre(genre):

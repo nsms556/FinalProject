@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 from Utils.file import load_json
-
+from Utils.static import *
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -63,74 +63,30 @@ def calculate_score(train, question, embedding, score_type) :
 
     return results
 
-def save_autoencoder_score(train, question, autoencoder_emb, score_type, include_genre, submit_type) :
+def save_autoencoder_score(train, question, autoencoder_emb, score_type, include_genre) :
     score = calculate_score(train, question, autoencoder_emb, score_type)
 
     if include_genre:
-        if submit_type == 'val':
-            np.save(f'scores/val_scores_bias_{score_type}_gnr', score)
-        elif submit_type == 'test':
-            np.save(f'scores/test_scores_bias_{score_type}_gnr', score)
-        else:
-            np.save(f'scores/local_val_scores_bias_{score_type}_gnr', score)
+        np.save(autoencoder_gnr_score_file_path, score)
     else:
-        if submit_type == 'val':
-            np.save(f'scores/val_scores_bias_{score_type}', score)
-        elif submit_type == 'test':
-            np.save(f'scores/test_scores_bias_{score_type}', score)
-        else:
-            np.save(f'scores/local_val_scores_bias_{score_type}', score)
+        np.save(autoencoder_score_file_path, score)
 
-def save_word2vec_score(train, question, word2vec_emb, score_type, submit_type) :
+def save_word2vec_score(train, question, word2vec_emb, score_type) :
     score = calculate_score(train, question, word2vec_emb, score_type)
 
-    if submit_type == 'local_val':
-        np.save(f'scores/local_val_scores_title_{score_type}', score)
-    elif submit_type == 'val':
-        np.save(f'scores/val_scores_title_{score_type}', score)
-    elif submit_type == 'test':
-        np.save(f'scores/test_scores_title_{score_type}', score)
+    np.save(word2vec_score_file_path, score)
 
 
 if __name__ == '__main__' :
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-mode', type=int, help="local_val: 0, val: 1, test: 2", default=2)
-
-    args = parser.parse_args()
-    print(args)
-
-    val_file_path = None
-    if args.mode == 0 :
-        default_file_path = 'arena_data'
-        train_file_path = '{}/orig/train.json'.format(default_file_path)
-        question_file_path = '{}/questions/val.json'.format(default_file_path)
-        submit_type = 'local_val'
-    elif args.mode == 1 :
-        default_file_path = 'res'
-        train_file_path = '{}/train.json'.format(default_file_path)
-        question_file_path = '{}/val.json'.format(default_file_path)
-        submit_type = 'val'
-    elif args.mode == 2 :
-        default_file_path = 'res'
-        train_file_path = '{}/train.json'.format(default_file_path)
-        val_file_path = '{}/val.json'.format(default_file_path)
-        question_file_path = '{}/test.json'.format(default_file_path)
-        submit_type = 'test'
-    else :
-        print('Wrong Mode input')
-        exit()
-
     train = load_json(train_file_path)
-    if val_file_path != None :
-        train = train + load_json(val_file_path)
     question = load_json(question_file_path)
 
-    autoencoder_emb = np.load('{}/plylst_emb.npy'.format(default_file_path), allow_pickle=True).item()
-    autoencoder_emb_gnr = np.load('{}/plylst_emb_gnr.npy'.format(default_file_path), allow_pickle=True).item()
-    word2vec_emb = np.load('{}/plylst_w2v_emb.npy'.format(default_file_path), allow_pickle=True).item()
+    autoencoder_emb = np.load(plylst_emb_path, allow_pickle=True).item()
+    autoencoder_emb_gnr = np.load(plylst_emb_gnr_path, allow_pickle=True).item()
+    word2vec_emb = np.load(plylst_w2v_emb_path, allow_pickle=True).item()
 
-    save_autoencoder_score(train, question, autoencoder_emb, 'cos', False, submit_type)
-    save_autoencoder_score(train, question, autoencoder_emb_gnr, 'cos', True, submit_type)
-    save_word2vec_score(train, question, word2vec_emb, 'cos', submit_type)
+    save_autoencoder_score(train, question, autoencoder_emb, 'cos', False)
+    save_autoencoder_score(train, question, autoencoder_emb_gnr, 'cos', True)
+    save_word2vec_score(train, question, word2vec_emb, 'cos')
 
     print('Calculate Similarity Score Complete')

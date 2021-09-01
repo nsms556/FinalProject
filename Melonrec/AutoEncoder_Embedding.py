@@ -200,9 +200,6 @@ if __name__ == '__main__' :
 
     train_dataset = SongTagDataset(train_data, tag2id_file_path, song2id_file_path)
 
-    if question_data is not None :
-        question_dataset = SongTagDataset(question_data, tag2id_file_path, song2id_file_path)
-
     handler.train_autoencoder(train_dataset, autoencoder_model_path, id2song_file_path, id2tag_file_path, question_dataset, answer_file_path)
 
     plylst_emb = handler.autoencoder_plylsts_embeddings(train_data, False, True)

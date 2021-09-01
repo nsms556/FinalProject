@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 
 from Utils.file import load_json
 from Utils.preprocessing import genre_gn_all_preprocessing, genre_DicGenerator
-
+from Utils.static import song_meta_file_path, genre_meta_file_path
 
 class SongTagDataset(Dataset):
     def __init__(self, json_dataset, tag2id_file_path, prep_song2id_file_path):
@@ -73,9 +73,9 @@ class SongTagGenreDataset(Dataset):
         return _id, _input, gnr_vector, dtl_gnr_vector
 
     def _init_song_meta(self):
-        song_meta = load_json('res/song_meta.json')
+        song_meta = load_json(song_meta_file_path)
 
-        genre_gn_all = pd.read_json('res/genre_gn_all.json', encoding='utf8', typ='series')
+        genre_gn_all = pd.read_json(genre_meta_file_path, encoding='utf8', typ='series')
         genre_gn_all = pd.DataFrame(genre_gn_all, columns=['gnr_name']).reset_index().rename(
             columns={'index': 'gnr_code'})
 
