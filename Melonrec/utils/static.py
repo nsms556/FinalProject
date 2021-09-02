@@ -11,7 +11,7 @@ id2song_file_path = 'Lib/id2song.npy'
 
 autoencoder_model_path = 'Weights/autoencoder_model.pth'
 tokenize_input_file_path = 'Weights/tokenizer_input.txt'
-vectorizer_model_path = 'Weights/vectorizer.weights'
+vectorizer_weights_path = 'Weights/w2v.weights'
 
 tmp_results_path = 'results/tmp_results.json'
 temp_fn = 'Arena_data/answers/temp.json'

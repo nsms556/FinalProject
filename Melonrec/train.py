@@ -48,4 +48,4 @@ if __name__ == '__main__' :
     autoencoder_handler.save_model(autoencoder_path)
 
     word2vec_handler.train_vectorizer(train_file_path, genre_meta_file_path, True)
-    word2vec_handler.vectorizer.save_model(vectorizer_model_path)
+    word2vec_handler.vectorizer.save_model(vectorizer_weights_path)

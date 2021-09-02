@@ -1,3 +1,4 @@
+from torch._C import dtype
 from tqdm import tqdm
 
 import numpy as np
@@ -10,6 +11,8 @@ from torchtext import Vectors
 
 from khaiii import KhaiiiApi
 
+from Models.word2vec import Kakao_Tokenizer
+
 from Utils.static import *
 
 
@@ -20,8 +23,8 @@ class Recommender(nn.Module) :
         super(Recommender, self).__init__()
 
         self.autoencoder = self._load_autoencoder(autoencoder_model_path)
-        self.vectorizer, self.word_dict = self._load_vectorizer(vectorizer_model_path)
-        self.tokenizer = KhaiiiApi()
+        self.vectorizer, self.word_dict = self._load_vectorizer('Weights/w2v')
+        self.tokenizer = Kakao_Tokenizer()
         self.cos = nn.CosineSimilarity(dim=1)
 
         self.pre_auto_emb = pd.DataFrame(np.load(plylst_emb_path, allow_pickle=True).item()).T
@@ -41,27 +44,24 @@ class Recommender(nn.Module) :
 
     def autoencoder_embedding(self, question_loader:DataLoader, genre:bool) :
         with torch.no_grad() :
+            output_df = pd.DataFrame()
             if genre : 
-                auto_emb_gnr = self.pre_auto_emb_gnr.copy()
                 for _id, _data, _dnr, _dtl_dnr in tqdm(question_loader) :
                     _data = _data.to(device)
                     output = self.autoencoder.encoder[1](_data)
                     output = torch.cat([output.cpu(), _dnr, _dtl_dnr], dim=1)
 
-                    output_df = pd.DataFrame(data=output.tolist(), index=_id.tolist())
-                    auto_emb_gnr = pd.concat([auto_emb_gnr, output_df])
+                    output_df = pd.concat([output_df, pd.DataFrame(data=output.tolist(), index=_id.tolist())])
 
-                    return auto_emb_gnr
+                return output_df
             else :
-                auto_emb = self.pre_auto_emb.copy()
                 for _id, _data in tqdm(question_loader) :
                     _data = _data.to(device)
                     output = self.autoencoder.encoder[1](_data)
                     
-                    output_df = pd.DataFrame(data=output.tolist(), index=_id.tolist())
-                    auto_emb = pd.concat([auto_emb, output_df])
-
-                    return auto_emb
+                    output_df = pd.concat([output_df, pd.DataFrame(data=output.tolist(), index=_id.tolist())])
+                    
+                return output_df
 
     def word2vec_embedding(self, question_data:pd.DataFrame) :
         def find_word_embed(words) :
@@ -74,58 +74,45 @@ class Recommender(nn.Module) :
   
             return ret
 
-        w2v_emb = self.pre_w2v_emb.copy()
-
         p_ids = question_data['id']
-        p_titles = question_data['plylst_title']
+        p_token = question_data['plylst_title'].map(lambda x : self.tokenizer.sentences_to_tokens(x)[0])
         p_tags = question_data['tags']
         p_dates = question_data['updt_date'].str[:7].str.split('-')
-
-        question_data['tokens'] = p_titles + p_tags + p_dates
+       
+        question_data['tokens'] = p_token + p_tags + p_dates
         question_data['emb_input'] = question_data['tokens'].map(lambda x : find_word_embed(x))
 
         outputs = []
         for e in question_data['emb_input'] :
-            word_output = self.vectorizer(torch.LongTensor(e))
+            _data = torch.LongTensor(e).to(device)
+            word_output = self.vectorizer(_data)
             if len(word_output) :
                 output = torch.mean(word_output, axis=0)
             else :
                 output = torch.zeros(200)
-        outputs.append(output)
+            outputs.append(output)
         outputs = torch.stack(outputs)
 
-        w2v_emb = pd.concat([w2v_emb, pd.DataFrame(outputs.tolist(), index=p_ids)])
+        output_df = pd.DataFrame(outputs.tolist(), index=p_ids)
 
-        return w2v_emb
+        return output_df
 
-        '''
-            p_words = []
-            for q in tqdm(question_data) :
-                p_id = q['id']
-                p_title = q['plylst_title']
-                p_tags = q['tags']
-                p_date = q['updt_date'][:7].split('-')
+    def calc_similarity(self, question_df, train_df) :
+        train_tensor = torch.from_numpy(train_df.values).to(device)
+        question_tensor = torch.from_numpy(question_df.values).to(device)
 
-                p_title_tokens = self.tokenizer.analyze([p_title])
-                if len(p_title_tokens):
-                    p_title_tokens = p_title_tokens[0]
-                else:
-                    p_title_tokens = []
+        scores = torch.zeros([question_tensor.shape[0], train_tensor.shape[0]], dtype=torch.float64).to(device)
+        for idx, vector in enumerate(question_tensor) :
+            output = self.cos(vector.reshape(1, -1), train_tensor)
+            scores[idx] = output
 
-                p_words = p_title_tokens + p_tags + p_date
+        scores = torch.sort(scores, descending=True)
+        sorted_scores, sorted_idx = scores.values.cpu().numpy(), scores.indices.cpu().numpy()
 
-                word_input = np.array([])
-                for p_word in p_words :
-                    try :
-                        x_word = np.append(word_input, self.word_dict[p_word])
-                    except :
-                        pass
-                word_input = torch.from_numpy(x_word)
+        s = pd.DataFrame(sorted_scores, index=question_df.index)
+        i = pd.DataFrame(sorted_idx, index=question_df.index).applymap(lambda x : train_df.index[x])
 
-                word_output = self.vectorizer(word_input)
+        return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in question_df.index])
 
-                if len(word_output) :
-                    output = torch.mean(word_output, axis=0)
-                else :
-                    output = torch.zeros(200)
-        '''
+    def calc_score(self) :
+        

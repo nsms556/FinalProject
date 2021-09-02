@@ -158,7 +158,7 @@ def inference(song_mp, tag_mp, song_issue_dic, song_artist_dic, q, tag_song_C, s
     return song_candidate, tag_candidate
 
 
-def Recommender(train, questions, n_msp, n_mtp, mode, sim_measure, song_meta, freq_song, save=False):
+def Recommender(train, questions, n_msp, n_mtp, mode, song_meta, freq_song, save=False):
     ## 최종 추천리스트
     rec_list = []
 
