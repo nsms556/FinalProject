@@ -10,7 +10,7 @@ from Models.word2vec import Kakao_Tokenizer, Str2Vec
 from Utils.static import *
 
 class Word2VecHandler :
-    def __init__(self, model_path) :
+    def __init__(self, model_path=None) :
         self.tokenizer = Kakao_Tokenizer()
         self.vectorizer = Str2Vec()
 
