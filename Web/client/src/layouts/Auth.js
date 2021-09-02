@@ -20,9 +20,10 @@ import React from "react";
 import {Redirect, Route, Switch, useLocation} from "react-router-dom";
 
 // reactstrap components
-import {Col, Container, Row} from "reactstrap";
+import {Container, Row} from "reactstrap";
 
 import routes from "routes.js";
+import AuthNavbar from "../components/Navbars/AuthNavbar";
 
 
 const Auth = () => {
@@ -63,18 +64,9 @@ const Auth = () => {
         <>
             <div className="main-content" ref={mainContent}>
                 <div className="header bg-gradient-info py-7 py-lg-8">
+                    <AuthNavbar/>
                     <Container>
-                        <div className="header-body text-center mb-7">
-                            <Row className="justify-content-center">
-                                <Col lg="5" md="6">
-                                    <h1 className="text-white">Welcome!</h1>
-                                    <p className="text-lead text-light">
-                                        Use these awesome forms to login or create new account in
-                                        your project for free.
-                                    </p>
-                                </Col>
-                            </Row>
-                        </div>
+                        <div className="header-body text-center mb-7"/>
                     </Container>
                     <div className="separator separator-bottom separator-skew zindex-100">
                         <svg
