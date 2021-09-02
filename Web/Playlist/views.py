@@ -1,3 +1,4 @@
+from json.decoder import JSONDecodeError
 from django.shortcuts import render
 import os
 import json
@@ -43,29 +44,40 @@ def index(request):
     
     # 노래 검색
     elif request.method == 'POST':
-        body = json.loads(request.body.decode('utf-8'))
-        song_title = body['song_title']
-        artist = body['artist']
+        try:
+            body = json.loads(request.body.decode('utf-8'))
+            song_title = body['song_title']
+            artist = body['artist']
 
-        conn = sqlite3.connect('data.db')
-        cur = conn.cursor()
-        if song_title and artist:
-            cur.execute(f"select id, song_name, artist_name_basket, album_name, album_id, issue_date \
-                    from song_meta \
-                    where song_name LIKE '%{song_title}%' and artist_name_basket LIKE '%{artist}%'")
-        elif song_title and not artist:
-            cur.execute(f"select id, song_name, artist_name_basket, album_name, album_id, issue_date \
-                    from song_meta \
-                    where song_name LIKE '%{song_title}%'")
-        else:
-            cur.execute(f"select id, song_name, artist_name_basket, album_name, album_id, issue_date \
-                    from song_meta \
-                    where artist_name_basket LIKE '%{artist}%'")
-        output = []
-        rows = cur.fetchall()
-        for row in rows:
-            output.append(row)
-        return JsonResponse({'success': True, 'output':output}, json_dumps_params={'ensure_ascii': True})
+            conn = sqlite3.connect('data.db')
+            cur = conn.cursor()
+            if song_title and artist:
+                cur.execute(f"select id, song_name, artist_name_basket, album_name, album_id, issue_date \
+                        from song_meta \
+                        where song_name LIKE '%{song_title}%' and artist_name_basket LIKE '%{artist}%'")
+            elif song_title and not artist:
+                cur.execute(f"select id, song_name, artist_name_basket, album_name, album_id, issue_date \
+                        from song_meta \
+                        where song_name LIKE '%{song_title}%'")
+            else:
+                cur.execute(f"select id, song_name, artist_name_basket, album_name, album_id, issue_date \
+                        from song_meta \
+                        where artist_name_basket LIKE '%{artist}%'")
+            output = []
+            rows = cur.fetchall()
+            for row in rows:
+                content = {
+                        'song_id': row[0],
+                        'song_name': row[1],
+                        'artist': row[2],
+                        'album_id': row[3],
+                        'album_name': row[4],
+                        'issue_date': row[5]
+                    }
+                output.append(content)
+            return JsonResponse({'output':output}, json_dumps_params={'ensure_ascii': True})
+        except KeyError:
+            return # redirect home
     
 
 # '/detail' 플레이리스트 내부 곡 정보
@@ -77,24 +89,36 @@ def detail(request):
 def show_inference(request):
     conn = sqlite3.connect('data.db')
     cur = conn.cursor()
-    
+
     if request.method == 'GET':
         return JsonResponse({'success':True}, json_dumps_params={'ensure_ascii':True})
-
+    
+    # 정보 json으로 받고 추천
     if request.method == 'POST':
-        # 추천을 위한 정보 json으로 받고 추천
-        body = json.loads(request.body.decode('utf-8'))
-        question_dataset = body
-        question_dataset = SongTagDataset(question_dataset, tag2id_file_path, prep_song2id_file_path)
-        question_dataloader = DataLoader(question_dataset, shuffle=True, batch_size=256, num_workers=8)
+        try:
+            body = json.loads(request.body.decode('utf-8'))
+            question_dataset = body
+            question_dataset = SongTagDataset(question_dataset, tag2id_file_path, prep_song2id_file_path)
+            question_dataloader = DataLoader(question_dataset, shuffle=True, batch_size=256, num_workers=8)
 
-        output = inference(question_dataloader, model, result_path, id2song_dict, id2tag_dict)
-        song_names = []
+            output = inference(question_dataloader, model, result_path, id2song_dict, id2tag_dict)
+            song_list = []
 
-        for song in output['songs'][0]:
-            cur.execute(f'select song_name, artist_name_basket from song_meta where id={song}')
-            rows = cur.fetchall()
-            for row in rows:
-                song_names.append(row)
+            for song in output['songs'][0]:
+                cur.execute(f"select id, song_name, artist_name_basket, album_id, album_name, issue_date\
+                    from song_meta where id={song}")
+                rows = cur.fetchall()
+                for row in rows:
+                    content = {
+                        'song_id': row[0],
+                        'song_name': row[1],
+                        'artist': row[2],
+                        'album_id': row[3],
+                        'album_name': row[4],
+                        'issue_date': row[5]
+                    }
+                    song_list.append(content)
 
-        return JsonResponse({'song_list': song_names}, json_dumps_params={'ensure_ascii': True})
+            return JsonResponse({'song_list': song_list}, json_dumps_params={'ensure_ascii': True})
+        except (KeyError, JSONDecodeError, ValueError) as e:
+            pass
