@@ -77,7 +77,7 @@ class Word2VecHandler :
         else :                  # kakao non-filtered #
             tokenized_sentences = self.tokenizer.sentences_to_tokens(sentences)
 
-        print("start train_vectorizer.... name : {}".format(vectorizer_model_path))
+        print("start train_vectorizer.... name : {}".format(vectorizer_weights_path))
 
         self.vectorizer = Str2Vec(tokenized_sentences, size=200, window=5, min_count=1, workers=8, sg=1, hs=1)
 

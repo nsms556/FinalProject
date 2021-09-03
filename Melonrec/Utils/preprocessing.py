@@ -192,3 +192,15 @@ def most_popular(playlists, col, topk_count):
 
     topk = c.most_common(topk_count)
     return c, [k for k, v in topk]
+
+# 1) Counter 객체에서 빈도수 기준 topk개 출력
+def most_similar(cnt, topk):
+    cnt_topk = cnt.most_common(topk)
+    return [k for k, v in cnt_topk]
+
+# 2) 미리 계산한 유사도 기준 topk개의 플레이리스트의 plylsts와 scores 출력
+def most_similar_emb(q_id, topk, emb_scores):
+    plylsts = [t[0] for t in emb_scores[q_id][:topk]]
+    scores = [t[1] for t in emb_scores[q_id][:topk]]
+
+    return plylsts, scores
