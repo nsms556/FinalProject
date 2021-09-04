@@ -66,8 +66,8 @@ class SongTagGenreDataset(Dataset):
         _id = self.train[idx]['id']
         song_vector = self._song_ids2vec(self.train[idx]['songs'])
         tag_vector = self._tag_ids2vec(self.train[idx]['tags'])
-        gnr_vector = self._get_gnr_vector(self.train[idx]['songs'], self.gnr_code, self.gnr_dic, self.song_gnr_dic)
-        dtl_gnr_vector = self._get_dtl_gnr_vector(self.train[idx]['songs'], self.dtl_gnr_code, self.dtl_dic, self.song_dtl_dic)
+        gnr_vector = torch.from_numpy(self._get_gnr_vector(self.train[idx]['songs'], self.gnr_code, self.gnr_dic, self.song_gnr_dic))
+        dtl_gnr_vector = torch.from_numpy(self._get_dtl_gnr_vector(self.train[idx]['songs'], self.dtl_gnr_code, self.dtl_dic, self.song_dtl_dic))
         _input = torch.from_numpy(np.concatenate([song_vector, tag_vector]).astype(np.float32))
 
         return _id, _input, gnr_vector, dtl_gnr_vector

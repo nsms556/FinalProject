@@ -8,7 +8,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from torchtext import Vectors
+from torchtext.vocab import Vectors
 
 from Models.word2vec import Kakao_Tokenizer
 from Models.dataset import SongTagDataset, SongTagGenreDataset
@@ -33,6 +33,8 @@ class Recommender(nn.Module) :
         self.pre_auto_emb_gnr = pd.DataFrame(np.load(plylst_emb_gnr_path, allow_pickle=True).item()).T
         self.pre_w2v_emb = pd.DataFrame(np.load(plylst_w2v_emb_path, allow_pickle=True).item()).T
 
+        self._load_dictionary()
+
     def _load_autoencoder(self, model_path) :
         autoencoder = torch.load(model_path)
 
@@ -40,7 +42,7 @@ class Recommender(nn.Module) :
 
     def _load_vectorizer(self, model_path) :
         vectors = Vectors(name=model_path)
-        embedding = nn.Embedding.from_pretrained(vectors.vectors, freeze=False)
+        embedding = nn.Embedding.from_pretrained(vectors.vectors, freeze=False).to(device)
 
         return embedding, pd.Series(vectors.stoi)
 
@@ -53,7 +55,9 @@ class Recommender(nn.Module) :
         _, self.song_popular = most_popular(train_data, 'songs', 200)
         _, self.tag_popular = most_popular(train_data, 'tags', 20)
 
-    def autoencoder_embedding(self, question_loader:DataLoader, genre:bool) :
+    def autoencoder_embedding(self, question_dataset, genre:bool) :
+        question_loader = DataLoader(question_dataset, batch_size=256, num_workers=8)
+
         with torch.no_grad() :
             output_df = pd.DataFrame()
             if genre : 
@@ -62,7 +66,7 @@ class Recommender(nn.Module) :
                     output = self.autoencoder.encoder[1](_data)
                     output = torch.cat([output.cpu(), _dnr, _dtl_dnr], dim=1)
 
-                    output_df = pd.concat([output_df, pd.DataFrame(data=output.tolist(), index=_id.tolist())])
+                    output_df = pd.concat([output_df, pd.DataFrame(data=output.numpy(), index=_id.tolist())])
 
                 return output_df
             else :
@@ -70,7 +74,7 @@ class Recommender(nn.Module) :
                     _data = _data.to(device)
                     output = self.autoencoder.encoder[1](_data)
                     
-                    output_df = pd.concat([output_df, pd.DataFrame(data=output.tolist(), index=_id.tolist())])
+                    output_df = pd.concat([output_df, pd.DataFrame(data=output.cpu().numpy(), index=_id.tolist())])
                     
                 return output_df
 
@@ -100,7 +104,7 @@ class Recommender(nn.Module) :
             if len(word_output) :
                 output = torch.mean(word_output, axis=0)
             else :
-                output = torch.zeros(200)
+                output = torch.zeros(200).to(device)
             outputs.append(output)
         outputs = torch.stack(outputs)
 
@@ -109,6 +113,7 @@ class Recommender(nn.Module) :
         return output_df
 
     def calc_similarity(self, question_df, train_df) :
+        df_id = question_df.index
         train_tensor = torch.from_numpy(train_df.values).to(device)
         question_tensor = torch.from_numpy(question_df.values).to(device)
 
@@ -123,7 +128,7 @@ class Recommender(nn.Module) :
         s = pd.DataFrame(sorted_scores, index=question_df.index)
         i = pd.DataFrame(sorted_idx, index=question_df.index).applymap(lambda x : train_df.index[x])
 
-        return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in question_df.index])
+        return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in df_id], index=df_id)
     
     def _counting_question_data(self, q_songs, q_tags) :
         song_plylst_C = Counter()
@@ -234,7 +239,7 @@ class Recommender(nn.Module) :
         
         return lt_song_art
 
-    def inference(self, question_data, n_msp=50, n_mtp=90, save=True) :
+    def inference(self, question_file_path, n_msp=50, n_mtp=90, save=True) :
         question_data = load_json(question_file_path)
         question_dataset = SongTagDataset(question_data, tag2id_file_path, song2id_file_path)
         question_g_dataset = SongTagGenreDataset(question_data, tag2id_file_path, song2id_file_path)
