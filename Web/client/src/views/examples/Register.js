@@ -16,8 +16,12 @@
 
 */
 
+import {useState} from "react";
+import axios from "axios";
+
 // reactstrap components
 import {
+    Alert,
     Button,
     Card,
     CardBody,
@@ -31,36 +35,79 @@ import {
 } from "reactstrap";
 
 const Register = () => {
+
+    const [Username, setUsername] = useState("");
+    const [Password, setPassword] = useState("");
+    const [ConfirmPassword, setConfirmPassword] = useState("");
+
+    const [ShowAlert, setShowAlert] = useState(false);
+
+    const onChangeUsername = (e) => {
+        setUsername(e.currentTarget.value);
+    }
+
+    const onChangePassword = (e) => {
+        setPassword(e.currentTarget.value);
+    }
+
+    const onChangeConfirmPassword = (e) => {
+        setConfirmPassword(e.currentTarget.value);
+    }
+
+    const onSubmitHandler = (e) => {
+
+        e.preventDefault();
+
+        if (Password === ConfirmPassword) {
+
+            const user = {
+                username: Username,
+                password: Password
+            };
+
+            setShowAlert(false);
+
+            // axios.post('http://127.0.0.1:8000/users/register/', user)
+            //     .then(response => {
+            //         if (response.data) {
+            //             console.log(response.data);
+            //         } else {
+            //             alert('회원가입에 실패했습니다.');
+            //         }
+            //     })
+        } else {
+            setShowAlert(true);
+        }
+    }
+
     return (
         <>
             <Col lg="6" md="8">
                 <Card className="bg-secondary shadow border-0">
                     <CardBody className="px-lg-5 py-lg-5">
-                        <Form role="form">
+                        <Form role="form" onSubmit={onSubmitHandler}>
                             <FormGroup>
                                 <InputGroup className="input-group-alternative mb-3">
                                     <InputGroupAddon addonType="prepend">
                                         <InputGroupText>
-                                            <i className="ni ni-hat-3"/>
+                                            <i className="ni ni-circle-08"/>
                                         </InputGroupText>
                                     </InputGroupAddon>
-                                    <Input placeholder="Name" type="text"/>
+                                    <Input placeholder="Username" type="text" value={Username}
+                                           onChange={onChangeUsername}/>
                                 </InputGroup>
                             </FormGroup>
-                            <FormGroup>
-                                <InputGroup className="input-group-alternative mb-3">
-                                    <InputGroupAddon addonType="prepend">
-                                        <InputGroupText>
-                                            <i className="ni ni-email-83"/>
-                                        </InputGroupText>
-                                    </InputGroupAddon>
-                                    <Input
-                                        placeholder="Email"
-                                        type="email"
-                                        autoComplete="new-email"
-                                    />
-                                </InputGroup>
-                            </FormGroup>
+                            {
+                                ShowAlert &&
+                                <Alert color="danger">
+                                    <span className="alert-inner--icon">
+                                        <i className="ni ni-check-bold"/>
+                                    </span>{" "}
+                                    <span className="alert-inner--text">
+                                        Those passwords didn't match. Try again.
+                                    </span>
+                                </Alert>
+                            }
                             <FormGroup>
                                 <InputGroup className="input-group-alternative">
                                     <InputGroupAddon addonType="prepend">
@@ -72,6 +119,8 @@ const Register = () => {
                                         placeholder="Password"
                                         type="password"
                                         autoComplete="new-password"
+                                        value={Password}
+                                        onChange={onChangePassword}
                                     />
                                 </InputGroup>
                             </FormGroup>
@@ -84,13 +133,15 @@ const Register = () => {
                                     </InputGroupAddon>
                                     <Input
                                         placeholder="Confirm Password"
-                                        type="confirmPassword"
+                                        type="password"
                                         autoComplete="new-password"
+                                        value={ConfirmPassword}
+                                        onChange={onChangeConfirmPassword}
                                     />
                                 </InputGroup>
                             </FormGroup>
                             <div className="text-center">
-                                <Button className="mt-4" color="primary" type="button">
+                                <Button className="mt-4" color="primary" type="button" onClick={onSubmitHandler}>
                                     Create account
                                 </Button>
                             </div>
