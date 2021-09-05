@@ -41,14 +41,10 @@ const Login = () => {
                                 <InputGroup className="input-group-alternative">
                                     <InputGroupAddon addonType="prepend">
                                         <InputGroupText>
-                                            <i className="ni ni-email-83"/>
+                                            <i className="ni ni-circle-08"/>
                                         </InputGroupText>
                                     </InputGroupAddon>
-                                    <Input
-                                        placeholder="Email"
-                                        type="email"
-                                        autoComplete="new-email"
-                                    />
+                                    <Input placeholder="Username" type="text"/>
                                 </InputGroup>
                             </FormGroup>
                             <FormGroup>
