@@ -37,10 +37,7 @@ model.eval()
 def index(request):
     if request.method == 'GET':
         # 플레이리스트 홈화면
-        json_path = os.path.join(settings.BASE_DIR, 'Playlist/results/simple.json')
-        with open(json_path, encoding='utf-8') as json_file:
-            json_data = json.load(json_file)
-        return JsonResponse({'playlists':json_data}, json_dumps_params={'ensure_ascii':True})
+        return JsonResponse({'status':"home page"}, json_dumps_params={'ensure_ascii':True})
     
     # 노래 검색
     elif request.method == 'POST':
@@ -105,8 +102,10 @@ def show_inference(request):
             song_list = []
 
             for song in output['songs'][0]:
-                cur.execute(f"select id, song_name, artist_name_basket, album_id, album_name, issue_date\
-                    from song_meta where id={song}")
+                cur.execute(f"select id, song_name, artist_name_basket, album_id, album_name, issue_date,\
+                    song_gn_gnr_basket, song_gn_dtl_gnr_basket\
+                    from song_meta\
+                    where id={song}")
                 rows = cur.fetchall()
                 for row in rows:
                     content = {
@@ -115,7 +114,9 @@ def show_inference(request):
                         'artist': row[2],
                         'album_id': row[3],
                         'album_name': row[4],
-                        'issue_date': row[5]
+                        'issue_date': row[5],
+                        'gn_gnr' : row[6],
+                        'dtl_gnr': row[7]
                     }
                     song_list.append(content)
 
