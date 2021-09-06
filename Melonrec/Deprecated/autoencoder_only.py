@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from Utils.dataset import SongTagDataset
+from Models.dataset import SongTagDataset
 from Utils.file import load_json, write_json
 from Utils.preprocessing import binary_songs2ids, binary_tags2ids
 
@@ -17,7 +17,7 @@ tag2id_file_path = f'{default_file_path}/tag2id_local_val.npy'
 prep_song2id_file_path = f'{default_file_path}/freq_song2id_thr2_local_val.npy'
 id2tag_file_path = f'{default_file_path}/id2tag_local_val.npy'
 id2song_file_path = f'{default_file_path}/id2freq_song_thr2_local_val.npy'
-model_path = 'model\/autoencoder_450_256_0.0005_0.2_2_local_val.pkl'
+model_path = 'model/autoencoder_450_256_0.0005_0.2_2_local_val.pkl'
 question_path = None
 result_path = 'results/results.json'
 

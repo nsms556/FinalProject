@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 
 from Utils.file import load_json
 from Utils.preprocessing import genre_gn_all_preprocessing, genre_DicGenerator
-
+from Utils.static import song_meta_file_path, genre_meta_file_path
 
 class SongTagDataset(Dataset):
     def __init__(self, json_dataset, tag2id_file_path, prep_song2id_file_path):
@@ -66,16 +66,16 @@ class SongTagGenreDataset(Dataset):
         _id = self.train[idx]['id']
         song_vector = self._song_ids2vec(self.train[idx]['songs'])
         tag_vector = self._tag_ids2vec(self.train[idx]['tags'])
-        gnr_vector = self._get_gnr_vector(self.train[idx]['songs'], self.gnr_code, self.gnr_dic, self.song_gnr_dic)
-        dtl_gnr_vector = self._get_dtl_gnr_vector(self.train[idx]['songs'], self.dtl_gnr_code, self.dtl_dic, self.song_dtl_dic)
+        gnr_vector = torch.from_numpy(self._get_gnr_vector(self.train[idx]['songs'], self.gnr_code, self.gnr_dic, self.song_gnr_dic))
+        dtl_gnr_vector = torch.from_numpy(self._get_dtl_gnr_vector(self.train[idx]['songs'], self.dtl_gnr_code, self.dtl_dic, self.song_dtl_dic))
         _input = torch.from_numpy(np.concatenate([song_vector, tag_vector]).astype(np.float32))
 
         return _id, _input, gnr_vector, dtl_gnr_vector
 
     def _init_song_meta(self):
-        song_meta = load_json('res/song_meta.json')
+        song_meta = load_json(song_meta_file_path)
 
-        genre_gn_all = pd.read_json('res/genre_gn_all.json', encoding='utf8', typ='series')
+        genre_gn_all = pd.read_json(genre_meta_file_path, encoding='utf8', typ='series')
         genre_gn_all = pd.DataFrame(genre_gn_all, columns=['gnr_name']).reset_index().rename(
             columns={'index': 'gnr_code'})
 

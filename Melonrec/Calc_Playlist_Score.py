@@ -6,6 +6,7 @@ import numpy as np
 
 from Utils.file import write_json
 from Utils.preprocessing import DicGenerator, remove_seen, most_popular
+from Utils.static import *
 
 ## 추천 함수
 '''
@@ -157,7 +158,7 @@ def inference(song_mp, tag_mp, song_issue_dic, song_artist_dic, q, tag_song_C, s
     return song_candidate, tag_candidate
 
 
-def Recommender(train, questions, n_msp, n_mtp, mode, sim_measure, song_meta, freq_song, save=False):
+def Recommender(train, questions, n_msp, n_mtp, mode, song_meta, freq_song, save=False):
     ## 최종 추천리스트
     rec_list = []
 
@@ -175,9 +176,9 @@ def Recommender(train, questions, n_msp, n_mtp, mode, sim_measure, song_meta, fr
     gnr_scores: 입력으로 들어온 questions과 train간 유사도 (genre 정보 추가)
     title_scores: 입력으로 들어온 questions과 train간 유사도 (Word2vec 기반)
     '''
-    sim_scores = np.load(f'scores/{mode}_scores_bias_{sim_measure}.npy', allow_pickle=True).item()
-    gnr_scores = np.load(f'scores/{mode}_scores_bias_{sim_measure}_gnr.npy', allow_pickle=True).item()
-    title_scores = np.load(f'scores/{mode}_scores_title_{sim_measure}.npy', allow_pickle=True).item()
+    sim_scores = np.load(autoencoder_score_file_path, allow_pickle=True).item()
+    gnr_scores = np.load(autoencoder_gnr_score_file_path, allow_pickle=True).item()
+    title_scores = np.load(word2vec_score_file_path, allow_pickle=True).item()
 
     ## 3단계: 입력으로 들어온 questions 플레이리스트에 대해 추천
     for q in tqdm(questions):
