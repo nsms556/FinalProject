@@ -17,6 +17,7 @@
 */
 
 import {useState} from "react";
+
 import axios from "axios";
 
 // reactstrap components
@@ -34,13 +35,14 @@ import {
     InputGroupText
 } from "reactstrap";
 
-const Register = () => {
+const Register = ({history}) => {
 
     const [Username, setUsername] = useState("");
     const [Password, setPassword] = useState("");
     const [ConfirmPassword, setConfirmPassword] = useState("");
 
-    const [ShowAlert, setShowAlert] = useState(false);
+    const [CheckUsername, setCheckUsername] = useState(false);
+    const [CheckPassword, setCheckPassword] = useState(false);
 
     const onChangeUsername = (e) => {
         setUsername(e.currentTarget.value);
@@ -58,25 +60,39 @@ const Register = () => {
 
         e.preventDefault();
 
-        if (Password === ConfirmPassword) {
+        if (Username && Password && Password === ConfirmPassword) {
 
             const user = {
                 username: Username,
                 password: Password
             };
 
-            setShowAlert(false);
+            setCheckUsername(false);
+            setCheckPassword(false);
 
-            // axios.post('http://127.0.0.1:8000/users/register/', user)
-            //     .then(response => {
-            //         if (response.data) {
-            //             console.log(response.data);
-            //         } else {
-            //             alert('회원가입에 실패했습니다.');
-            //         }
-            //     })
+            axios.post('http://127.0.0.1:8000/users/register', user)
+                .then(response => {
+                    if (response.data && response.data.success) {
+                        history.push('/auth/login');
+                    } else {
+                        alert('Fail to Register');
+                    }
+                })
+                .catch(_ => {
+                    // status: 500
+                    // statusText: "Internal Server Error"
+                    // -> 기가입된 Username 을 입력하면 발생
+                    setCheckUsername(true);
+                })
+        } else if (Username) {
+            setCheckUsername(false);
+            setCheckPassword(true);
+        } else if (CheckPassword) {
+            setCheckUsername(true);
+            setCheckPassword(false);
         } else {
-            setShowAlert(true);
+            setCheckUsername(true);
+            setCheckPassword(true);
         }
     }
 
@@ -86,6 +102,17 @@ const Register = () => {
                 <Card className="bg-secondary shadow border-0">
                     <CardBody className="px-lg-5 py-lg-5">
                         <Form role="form" onSubmit={onSubmitHandler}>
+                            {
+                                CheckUsername &&
+                                <Alert color="danger">
+                                    <span className="alert-inner--icon">
+                                        <i className="ni ni-check-bold"/>
+                                    </span>{" "}
+                                    <span className="alert-inner--text">
+                                        This username isn't allowed. Try again.
+                                    </span>
+                                </Alert>
+                            }
                             <FormGroup>
                                 <InputGroup className="input-group-alternative mb-3">
                                     <InputGroupAddon addonType="prepend">
@@ -98,7 +125,7 @@ const Register = () => {
                                 </InputGroup>
                             </FormGroup>
                             {
-                                ShowAlert &&
+                                CheckPassword &&
                                 <Alert color="danger">
                                     <span className="alert-inner--icon">
                                         <i className="ni ni-check-bold"/>
