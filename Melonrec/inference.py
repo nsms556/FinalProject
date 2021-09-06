@@ -21,11 +21,11 @@ from Utils.preprocessing import DicGenerator, most_popular, remove_seen, most_si
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class Recommender(nn.Module) :
-    def __init__(self) :
+    def __init__(self, auto_weights=autoencoder_model_path, w2v_weights=vectorizer_weights_path) :
         super(Recommender, self).__init__()
 
-        self.autoencoder = self._load_autoencoder(autoencoder_model_path)
-        self.vectorizer, self.word_dict = self._load_vectorizer('Weights/w2v')
+        self.autoencoder = self._load_autoencoder(auto_weights)
+        self.vectorizer, self.word_dict = self._load_vectorizer(w2v_weights)
         self.tokenizer = Kakao_Tokenizer()
         self.cos = nn.CosineSimilarity(dim=1)
 
@@ -81,11 +81,11 @@ class Recommender(nn.Module) :
     def word2vec_embedding(self, question_data:pd.DataFrame) :
         def find_word_embed(words) :
             ret = []
-            try :
-                for word in words :
+            for word in words :
+                try :
                     ret.append(self.word_dict[word])
-            except KeyError :
-                pass
+                except KeyError :
+                    pass
   
             return ret
 
@@ -130,6 +130,86 @@ class Recommender(nn.Module) :
 
         return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in df_id], index=df_id)
     
+    def similarity_by_auto(self, question_df, genre:bool) :
+        with torch.no_grad() :
+            if genre :
+                train_tensor = torch.from_numpy(self.pre_auto_emb_gnr.values).to(device)
+                question_dataset = SongTagGenreDataset(question_df)
+                question_loader = DataLoader(question_dataset, batch_size=256, num_workers=8)
+                for _id, _data, _dnr, _dtl_dnr in tqdm(question_loader) :
+                    _data = _data.to(device)
+                    auto_emb = self.autoencoder.encoder[1](_data)
+                    auto_emb = torch.cat([auto_emb, _dnr.to(device), _dtl_dnr.to(device)], dim=1)
+            else :
+                train_tensor = torch.from_numpy(self.pre_auto_emb.values).to(device)
+                question_dataset = SongTagDataset(question_df)
+                question_loader = DataLoader(question_dataset, batch_size=256, num_workers=8)
+                for _id, _data in tqdm(question_loader) :
+                    _data = _data.to(device)
+                    auto_emb = self.autoencoder.encoder[1](_data)
+
+        scores = torch.zeros([auto_emb.shape[0], train_tensor.shape[0]], dtype=torch.float64).to(device)
+        for idx, vector in enumerate(auto_emb) :
+            output = self.cos(vector.reshape(1, -1), train_tensor)
+            scores[idx] = output
+
+        scores = torch.sort(scores, descending=True)
+        sorted_scores, sorted_idx = scores.values.cpu().numpy(), scores.indices.cpu().numpy()
+
+        s = pd.DataFrame(sorted_scores, index=question_df['id'])
+        if genre :
+            i = pd.DataFrame(sorted_idx, index=question_df['id']).applymap(lambda x : self.pre_auto_emb_gnr.index[x])
+        else :
+            i = pd.DataFrame(sorted_idx, index=question_df['id']).applymap(lambda x : self.pre_auto_emb.index[x])
+
+        return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in question_df['id']], index=question_df['id'])        
+    
+    def similarity_by_w2v(self, question_df) :
+        def find_word_embed(words) :
+            ret = []
+            for word in words :
+                try :
+                    ret.append(self.word_dict[word])
+                except KeyError :
+                    pass
+                
+            return ret
+
+        p_ids = question_df['id']
+        p_token = question_df['plylst_title'].map(lambda x : self.tokenizer.sentences_to_tokens(x)[0])
+        p_tags = question_df['tags']
+        p_dates = question_df['updt_date'].str[:7].str.split('-')
+
+        question_df['tokens'] = p_token + p_tags + p_dates
+        question_df['emb_input'] = question_df['tokens'].map(lambda x : find_word_embed(x))
+
+        outputs = []
+        for e in question_df['emb_input'] :
+            _data = torch.LongTensor(e).to(device)
+            with torch.no_grad() :
+                word_output = self.vectorizer(_data)
+            if len(word_output) :
+                output = torch.mean(word_output, axis=0)
+            else :
+                output = torch.zeros(200).to(device)
+            outputs.append(output)
+        outputs = torch.stack(outputs)
+
+        train_tensor = torch.from_numpy(self.pre_w2v_emb.values).to(device)
+
+        scores = torch.zeros([outputs.shape[0], train_tensor.shape[0]], dtype=torch.float64).to(device)
+        for idx, vector in enumerate(outputs) :
+            output = self.cos(vector.reshape(1, -1), train_tensor)
+            scores[idx] = output
+
+        scores = torch.sort(scores, descending=True)
+        sorted_scores, sorted_idx = scores.values.cpu().numpy(), scores.indices.cpu().numpy()
+
+        s = pd.DataFrame(sorted_scores, index=p_ids)
+        i = pd.DataFrame(sorted_idx, index=p_ids).applymap(lambda x : self.pre_w2v_emb.index[x])        
+
+        return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in p_ids], index=p_ids)        
+
     def _counting_question_data(self, q_songs, q_tags) :
         song_plylst_C = Counter()
         tag_song_C = Counter()
@@ -240,19 +320,13 @@ class Recommender(nn.Module) :
         return lt_song_art
 
     def inference(self, question_file_path, n_msp=50, n_mtp=90, save=True) :
+        question_df = pd.read_json(question_file_path)
+
+        auto_scores = self.similarity_by_auto(question_df, False)
+        auto_gnr_scores = self.similarity_by_auto(question_df, True)
+        w2v_scores = self.similarity_by_w2v(question_df)
+
         question_data = load_json(question_file_path)
-        question_dataset = SongTagDataset(question_data, tag2id_file_path, song2id_file_path)
-        question_g_dataset = SongTagGenreDataset(question_data, tag2id_file_path, song2id_file_path)
-        question_w2v_dataset = pd.read_json(question_file_path)
-
-        auto_scores = self.autoencoder_embedding(question_dataset, False)
-        auto_g_scores = self.autoencoder_embedding(question_g_dataset, True)
-        w2v_scores = self.word2vec_embedding(question_w2v_dataset)
-
-        auto_scores = self.calc_similarity(auto_scores, self.pre_auto_emb)
-        auto_g_scores = self.calc_similarity(auto_g_scores, self.pre_auto_emb_gnr)
-        w2v_scores = self.calc_similarity(w2v_scores, self.pre_w2v_emb)
-
         rec_list = []
 
         for q in question_data :
@@ -275,12 +349,12 @@ class Recommender(nn.Module) :
             elif song_tag_status == 1 :
                 plylst_ms, song_scores = most_similar_emb(q['id'], n_msp, auto_scores)
                 plylst_mt, tag_scores = most_similar_emb(q['id'], n_mtp, w2v_scores)
-                plylst_add, add_scores = most_similar_emb(q['id'], n_mtp, auto_g_scores)
+                plylst_add, add_scores = most_similar_emb(q['id'], n_mtp, auto_gnr_scores)
 
             # Case 3: song과 tag가 충분한 경우
             else:
                 plylst_ms, song_scores = most_similar_emb(q['id'], n_msp, auto_scores)
-                plylst_mt, tag_scores = most_similar_emb(q['id'], n_mtp, auto_g_scores)
+                plylst_mt, tag_scores = most_similar_emb(q['id'], n_mtp, auto_gnr_scores)
                 plylst_add, add_scores = most_similar_emb(q['id'], n_mtp, w2v_scores)
 
             plylsts = [plylst_ms, plylst_mt, plylst_add]
@@ -320,6 +394,15 @@ class Recommender(nn.Module) :
             rec_list.append({"id": q_id, "songs": song_candidate, "tags": tag_candidate})
 
         if save == True:
-            write_json(rec_list, 'results/results_' + dt.datetime.now().strftime("%y%m%d-%H%M%S") + '.json')
+            result_file_path = result_file_base.format(dt.datetime.now().strftime("%y%m%d-%H%M%S"))
+            write_json(rec_list, result_file_path)
+            print('Result file save to {}'.format(result_file_path))
+        else :
+            return rec_list
 
-        return rec_list
+if __name__ == '__main__' :
+    model = Recommender()
+
+    rec_list = model.inference(question_file_path)
+    print(pd.DataFrame(rec_list))
+    
