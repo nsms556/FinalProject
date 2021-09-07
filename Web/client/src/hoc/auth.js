@@ -5,7 +5,8 @@ import {useSelector, useDispatch} from "react-redux";
 import {auth} from '../_actions/user_actions';
 
 
-export default function (SpecificComponent, option, adminRoute = null) {
+// eslint-disable-next-line import/no-anonymous-default-export
+export default function (SpecificComponent, option) {
 
     function AuthenticationCheck(props) {
 
@@ -14,7 +15,7 @@ export default function (SpecificComponent, option, adminRoute = null) {
 
         useEffect(() => {
             // To know my current status, send Auth request
-            dispatch(auth()).then(response => {
+            dispatch(auth()).then(_ => {
 
                 const username = localStorage.getItem('username');
 
