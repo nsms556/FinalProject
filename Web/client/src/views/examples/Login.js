@@ -17,9 +17,8 @@
 */
 
 import {useState} from "react";
+import {useDispatch} from "react-redux";
 import {Link} from "react-router-dom";
-
-import axios from "axios";
 
 // reactstrap components
 import {
@@ -36,12 +35,17 @@ import {
     InputGroupText, Row
 } from "reactstrap";
 
-const Login = ({history}) => {
+import {loginUser} from "../../_actions/user_actions";
+
+
+const Login = () => {
 
     const [Username, setUsername] = useState("");
     const [Password, setPassword] = useState("");
 
     const [CheckUser, setCheckUser] = useState(false);
+
+    const dispatch = useDispatch();
 
     const onChangeUsername = (e) => {
         setUsername(e.currentTarget.value);
@@ -62,14 +66,17 @@ const Login = ({history}) => {
 
         setCheckUser(false);
 
-        axios.post('http://127.0.0.1:8000/users/login', user)
-            .then(response => {
-                if (response.data && response.data.success) {
-                    history.push('/index');
+        dispatch(loginUser(user))
+            .then((res) => {
+                if (res.payload.success) {
+                    window.localStorage.setItem('username', JSON.stringify(user.username));
+                    window.location.replace("/");
                 } else {
-                    // alert('Fail to Login');
                     setCheckUser(true);
                 }
+            })
+            .catch((err) => {
+                console.log(err);
             })
     }
 
