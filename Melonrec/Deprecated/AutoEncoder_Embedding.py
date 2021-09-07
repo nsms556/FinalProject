@@ -1,5 +1,4 @@
 import os
-import sys
 import argparse
 from tqdm import tqdm
 
@@ -35,6 +34,9 @@ class AutoEncoderHandler :
         
     def save_model(self, model_path) :
         torch.save(self.model, model_path)
+
+    def export_encoder_layer(self, weights_path) :
+        torch.save(self.model.encoder[1], weights_path)
 
     def train_autoencoder(self, train_dataset, id2song_file_path, id2tag_file_path, question_dataset, answer_file_path, args) :
         id2tag_dict = dict(np.load(id2tag_file_path, allow_pickle=True).item())
@@ -131,47 +133,6 @@ class AutoEncoderHandler :
 
         return plylst_emb_with_bias
 
-'''
-    def get_file_paths(args) :
-        answer_file_path = None
-        val_file_path = None
-        test_file_path = None
-
-        if args.mode == 0: 
-            default_file_path = 'arena_data'
-            model_postfix = 'local_val'
-            train_file_path = f'{default_file_path}/orig/train.json'
-            question_file_path = f'{default_file_path}/questions/val.json'
-            answer_file_path = f'{default_file_path}/answers/val.json'
-            
-        elif args.mode == 1:
-            default_file_path = 'res'
-            model_postfix = 'val'
-            train_file_path = f'{default_file_path}/train.json'
-            val_file_path = f'{default_file_path}/val.json'
-            
-        elif args.mode == 2:
-            default_file_path = 'res'
-            model_postfix = 'test'
-            train_file_path = f'{default_file_path}/train.json'
-            val_file_path = f'{default_file_path}/val.json'
-            test_file_path = f'{default_file_path}/test.json'
-            
-        else:
-            print('mode error! local_val: 0, val: 1, test: 2')
-            sys.exit(1)
-
-        tag2id_file_path = f'{default_file_path}/tag2id_{model_postfix}.npy'
-        id2tag_file_path = f'{default_file_path}/id2tag_{model_postfix}.npy'
-        song2id_file_path = f'{default_file_path}/freq_song2id_thr{args.freq_thr}_{model_postfix}.npy'
-        id2song_file_path = f'{default_file_path}/id2freq_song_thr{args.freq_thr}_{model_postfix}.npy'
-
-        autoencoder_model_path = 'model/autoencoder_{}_{}_{}_{}_{}_{}.pkl'. \
-            format(args.dimension, args.batch_size, args.learning_rate, args.dropout, args.freq_thr, model_postfix)
-
-        return train_file_path, val_file_path, test_file_path, question_file_path, answer_file_path, \
-        tag2id_file_path, id2tag_file_path, song2id_file_path, id2song_file_path, autoencoder_model_path
-'''
 
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser()

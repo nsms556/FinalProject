@@ -1,10 +1,11 @@
 import os
 import argparse
 
-from AutoEncoder_Embedding import AutoEncoderHandler
-from Word2vec_Embedding_Kakao import Word2VecHandler
-import Calc_Similarity_Score as css
+import numpy as np
+import pandas as pd
 
+from Models.autoencoder import AutoEncoderHandler
+from Models.word2vec import Word2VecHandler
 from Models.dataset import SongTagDataset
 
 from Utils.static import *
@@ -39,13 +40,21 @@ if __name__ == '__main__' :
     if not (os.path.exists(song2id_file_path) & os.path.exists(id2song_file_path)) :
         song_filter_by_freq(train_data, args.freq_thr, song2id_file_path, id2song_file_path)
 
-    train_dataset = SongTagDataset(train_data, tag2id_file_path, song2id_file_path)
-    question_dataset = SongTagDataset(question_data, tag2id_file_path, song2id_file_path)
+    train_dataset = SongTagDataset(pd.read_json(train_file_path))
+    question_dataset = SongTagDataset(pd.read_json(question_file_path))
 
     autoencoder_handler.train_autoencoder(train_dataset, id2song_file_path, id2tag_file_path, question_dataset, answer_file_path, args)
 
-    autoencoder_path = autoencoder_model_path.format(args.dimension, args.batch_size, args.learning_rate, args.dropout, args.freq_thr)
-    autoencoder_handler.save_model(autoencoder_path)
+    autoencoder_handler.save_model(autoencoder_model_path)
+    autoencoder_handler.export_encoder_layer(autoencoder_encoder_layer_path)
 
     word2vec_handler.train_vectorizer(train_file_path, genre_meta_file_path, True)
-    word2vec_handler.vectorizer.save_model(vectorizer_weights_path)
+    word2vec_handler.vectorizer.save_weights(vectorizer_weights_path)
+
+    plylst_emb = autoencoder_handler.autoencoder_plylsts_embeddings(train_data, False, True)
+    plylst_emb_gnr = autoencoder_handler.autoencoder_plylsts_embeddings(train_data, True, True)
+    plylst_w2v_emb = word2vec_handler.get_plylsts_embeddings(train_data, train=True)
+    
+    np.save(plylst_emb_path, plylst_emb)
+    np.save(plylst_emb_gnr_path, plylst_emb_gnr)
+    np.save(plylst_w2v_emb_path, plylst_w2v_emb)

@@ -121,34 +121,6 @@ class Word2VecHandler :
 
         return t_plylst_title_tag_emb
 
-'''
-    def get_file_paths(model_postfix):
-        genre_file_path = 'res/genre_gn_all.json'
-        tokenize_input_file_path = f'model/tokenizer_input_{model_postfix}.txt'
-
-        if model_postfix == 'val':
-            default_file_path = 'res'
-            train_file_path = 'res/train.json'
-            question_file_path = 'res/val.json'
-            val_file_path = question_file_path
-            test_file_path = None
-
-        elif model_postfix == 'test':
-            default_file_path = 'res'
-            train_file_path = 'res/train.json'
-            question_file_path = 'res/test.json'
-            val_file_path = 'res/val.json'
-            test_file_path = question_file_path
-
-        elif model_postfix == 'local_val':
-            default_file_path = 'arena_data'
-            train_file_path = f'{default_file_path}/orig/train.json'
-            question_file_path = f'{default_file_path}/questions/val.json'
-            val_file_path = None
-            test_file_path = None
-
-        return train_file_path, question_file_path, val_file_path, test_file_path, genre_file_path, tokenize_input_file_path
-'''
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

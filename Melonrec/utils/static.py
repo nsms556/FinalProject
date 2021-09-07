@@ -10,6 +10,7 @@ song2id_file_path = 'Lib/song2id.npy'
 id2song_file_path = 'Lib/id2song.npy'
 
 autoencoder_model_path = 'Weights/autoencoder_model.pth'
+autoencoder_encoder_layer_path = 'Weights/autoencoder_weights.pth'
 vectorizer_weights_path = 'Weights/w2v.weights'
 
 plylst_emb_path = 'Lib/plylst_emb.npy'

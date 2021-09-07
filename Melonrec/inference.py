@@ -54,81 +54,6 @@ class Recommender(nn.Module) :
         self.freq_song = set(dict(np.load(song2id_file_path, allow_pickle=True).item()).keys())
         _, self.song_popular = most_popular(train_data, 'songs', 200)
         _, self.tag_popular = most_popular(train_data, 'tags', 20)
-
-    def autoencoder_embedding(self, question_dataset, genre:bool) :
-        question_loader = DataLoader(question_dataset, batch_size=256, num_workers=8)
-
-        with torch.no_grad() :
-            output_df = pd.DataFrame()
-            if genre : 
-                for _id, _data, _dnr, _dtl_dnr in tqdm(question_loader) :
-                    _data = _data.to(device)
-                    output = self.autoencoder.encoder[1](_data)
-                    output = torch.cat([output.cpu(), _dnr, _dtl_dnr], dim=1)
-
-                    output_df = pd.concat([output_df, pd.DataFrame(data=output.numpy(), index=_id.tolist())])
-
-                return output_df
-            else :
-                for _id, _data in tqdm(question_loader) :
-                    _data = _data.to(device)
-                    output = self.autoencoder.encoder[1](_data)
-                    
-                    output_df = pd.concat([output_df, pd.DataFrame(data=output.cpu().numpy(), index=_id.tolist())])
-                    
-                return output_df
-
-    def word2vec_embedding(self, question_data:pd.DataFrame) :
-        def find_word_embed(words) :
-            ret = []
-            for word in words :
-                try :
-                    ret.append(self.word_dict[word])
-                except KeyError :
-                    pass
-  
-            return ret
-
-        p_ids = question_data['id']
-        p_token = question_data['plylst_title'].map(lambda x : self.tokenizer.sentences_to_tokens(x)[0])
-        p_tags = question_data['tags']
-        p_dates = question_data['updt_date'].str[:7].str.split('-')
-       
-        question_data['tokens'] = p_token + p_tags + p_dates
-        question_data['emb_input'] = question_data['tokens'].map(lambda x : find_word_embed(x))
-
-        outputs = []
-        for e in question_data['emb_input'] :
-            _data = torch.LongTensor(e).to(device)
-            word_output = self.vectorizer(_data)
-            if len(word_output) :
-                output = torch.mean(word_output, axis=0)
-            else :
-                output = torch.zeros(200).to(device)
-            outputs.append(output)
-        outputs = torch.stack(outputs)
-
-        output_df = pd.DataFrame(outputs.tolist(), index=p_ids)
-
-        return output_df
-
-    def calc_similarity(self, question_df, train_df) :
-        df_id = question_df.index
-        train_tensor = torch.from_numpy(train_df.values).to(device)
-        question_tensor = torch.from_numpy(question_df.values).to(device)
-
-        scores = torch.zeros([question_tensor.shape[0], train_tensor.shape[0]], dtype=torch.float64).to(device)
-        for idx, vector in enumerate(question_tensor) :
-            output = self.cos(vector.reshape(1, -1), train_tensor)
-            scores[idx] = output
-
-        scores = torch.sort(scores, descending=True)
-        sorted_scores, sorted_idx = scores.values.cpu().numpy(), scores.indices.cpu().numpy()
-
-        s = pd.DataFrame(sorted_scores, index=question_df.index)
-        i = pd.DataFrame(sorted_idx, index=question_df.index).applymap(lambda x : train_df.index[x])
-
-        return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in df_id], index=df_id)
     
     def similarity_by_auto(self, question_df, genre:bool) :
         with torch.no_grad() :
@@ -401,8 +326,10 @@ class Recommender(nn.Module) :
             return rec_list
 
 if __name__ == '__main__' :
+    print('Load Recommender Model')
     model = Recommender()
 
-    rec_list = model.inference(question_file_path)
+    print('Recommneding...')
+    rec_list = model.inference(question_file_path, False)
     print(pd.DataFrame(rec_list))
     
