@@ -1,3 +1,4 @@
+# Paths
 train_file_path = 'Data/train.json'
 answer_file_path = 'Data/answer.json'
 question_file_path = 'Data/question.json'

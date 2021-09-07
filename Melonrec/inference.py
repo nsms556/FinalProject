@@ -1,24 +1,33 @@
+# Visualization library
+# from tqdm import tqdm
+
+# python standard library
 import datetime as dt
 from collections import Counter, defaultdict
-from tqdm import tqdm
 
+# Data library
 import numpy as np
 import pandas as pd
 
+# Torch
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchtext.vocab import Vectors
 
+# Models
 from Models.word2vec import Kakao_Tokenizer
 from Models.dataset import SongTagDataset, SongTagGenreDataset
 
+# Utils
 from Utils.file import load_json, write_json
 from Utils.static import *
 from Utils.preprocessing import DicGenerator, most_popular, remove_seen, most_similar, most_similar_emb
 
 
+# CUDA
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 
 class Recommender(nn.Module) :
     def __init__(self, auto_weights=autoencoder_model_path, w2v_weights=vectorizer_weights_path) :
@@ -318,18 +327,19 @@ class Recommender(nn.Module) :
 
             rec_list.append({"id": q_id, "songs": song_candidate, "tags": tag_candidate})
 
-        if save == True:
+        if save is True:
             result_file_path = result_file_base.format(dt.datetime.now().strftime("%y%m%d-%H%M%S"))
             write_json(rec_list, result_file_path)
             print('Result file save to {}'.format(result_file_path))
         else :
             return rec_list
 
+
 if __name__ == '__main__' :
     print('Load Recommender Model')
     model = Recommender()
 
-    print('Recommneding...')
+    print('Recommending...')
     rec_list = model.inference(question_file_path, False)
     print(pd.DataFrame(rec_list))
     

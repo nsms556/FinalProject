@@ -1,11 +1,15 @@
-from tqdm import tqdm
+# Visualization library
+# from tqdm import tqdm
 
+# Data library
 import numpy as np
 import pandas as pd
 
+# NLP library
 from khaiii import KhaiiiApi
 from gensim.models import Word2Vec
 
+# Utils
 from Utils.file import load_json
 from Utils.static import *
 

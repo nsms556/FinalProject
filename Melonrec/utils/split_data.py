@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
+# Python strandard library
 import copy
 import random
 
+# CLI Library
 import fire
-
 import numpy as np
 
+# Utils
 from Utils.file import load_json, write_json
 
 

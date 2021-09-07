@@ -1,11 +1,14 @@
-# -*- coding: utf-8 -*-
+# Visualization library
+# from tqdm import tqdm
+
+# CLI library
 import fire
-from tqdm import tqdm
 
+# Data library
 import numpy as np
-
 import torch
 
+# Utils
 from Utils.file import remove_file, load_json, write_json
 from Utils.preprocessing import binary_songs2ids, binary_tags2ids
 

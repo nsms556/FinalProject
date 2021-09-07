@@ -1,16 +1,21 @@
+# Python standard library
 import os
 import argparse
 
+# Data library
 import numpy as np
 import pandas as pd
 
+# Models
 from Models.autoencoder import AutoEncoderHandler
 from Models.word2vec import Word2VecHandler
 from Models.dataset import SongTagDataset
 
+# Utils
 from Utils.static import *
 from Utils.file import load_json
 from Utils.preprocessing import song_filter_by_freq, tags_encoding
+
 
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
@@ -30,6 +35,9 @@ if __name__ == '__main__' :
     question_data = load_json(question_file_path)
     answer_data = load_json(answer_file_path)
 
+    train_dataset = SongTagDataset(pd.read_json(train_file_path))
+    question_dataset = SongTagDataset(pd.read_json(question_file_path))
+
     print('Create Embedding Handlers')
     autoencoder_handler = AutoEncoderHandler()
     word2vec_handler = Word2VecHandler()
@@ -39,9 +47,6 @@ if __name__ == '__main__' :
 
     if not (os.path.exists(song2id_file_path) & os.path.exists(id2song_file_path)) :
         song_filter_by_freq(train_data, args.freq_thr, song2id_file_path, id2song_file_path)
-
-    train_dataset = SongTagDataset(pd.read_json(train_file_path))
-    question_dataset = SongTagDataset(pd.read_json(question_file_path))
 
     autoencoder_handler.train_autoencoder(train_dataset, id2song_file_path, id2tag_file_path, question_dataset, answer_file_path, args)
 

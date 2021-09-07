@@ -1,9 +1,13 @@
+# Python strandard library
 from collections import defaultdict, Counter
 
+# Data library
 import numpy as np
 import pandas as pd
 
+# Torch
 import torch
+
 
 def tags_encoding(json_data, tag2id_path, id2tag_path):
     tag_lists = pd.DataFrame(json_data)['tags'].tolist()

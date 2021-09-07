@@ -1,15 +1,20 @@
-from tqdm import tqdm
+# Visualization library
+# from tqdm import tqdm
 
+# Data library
 import numpy as np
 import pandas as pd
 
+# Torch
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
+# Models
 from Models.dataset import SongTagDataset, SongTagGenreDataset
 
+# Utils
 from Utils.file import remove_file
 from Utils.evaluate import mid_check
 from Utils.static import *
