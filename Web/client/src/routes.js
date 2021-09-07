@@ -22,44 +22,74 @@ import Register from "views/examples/Register.js";
 import Login from "views/examples/Login.js";
 
 import PlaylistPage from "views/PlaylistPage/PlaylistPage";
+import LogoutPage from "views/LogoutPage/LogoutPage";
+import SearchPage from "views/SearchPage/SearchPage";
+
+import Auth from "./hoc/auth";
+
+
+const username = localStorage.getItem('username');
 
 
 let routes = [
     {
+        path: "/index",
+        name: "HOME/MAIN",
+        icon: "ni ni-tv-2 text-black",
+        component: Auth(Index, null),
+        layout: "/admin",
+    },
+    {
+        path: "/search",
+        name: "Search",
+        icon: "ni ni-archive-2 text-primary",
+        component: Auth(SearchPage, null),
+        layout: "/admin",
+    },
+    {
         path: "/playlist",
         name: "Playlist",
-        icon: "ni ni-favourite-28 text-danger",
-        component: PlaylistPage,
+        icon: "ni ni-headphones text-danger",
+        component: Auth(PlaylistPage, true),
         layout: "/admin",
-    },
-    {
-        path: "/index",
-        name: "",
-        icon: "ni ni-check-bold text-secondary",
-        component: Index,
-        layout: "/admin",
-    },
-    {
-        path: "/user-profile",
-        name: "User Profile",
-        icon: "ni ni-single-02 text-yellow",
-        component: Profile,
-        layout: "/admin",
-    },
-    {
-        path: "/login",
-        name: "Login",
-        icon: "ni ni-key-25 text-info",
-        component: Login,
-        layout: "/auth",
-    },
-    {
-        path: "/register",
-        name: "Register",
-        icon: "ni ni-circle-08 text-pink",
-        component: Register,
-        layout: "/auth",
     },
 ];
+
+
+if (username) {
+    routes.push(
+        {
+            path: "/user-profile",
+            name: "User Profile",
+            icon: "ni ni-single-02 text-yellow",
+            component: Auth(Profile, true),
+            layout: "/admin",
+        },
+        {
+            path: "/logout",
+            name: "Logout",
+            icon: "ni ni-button-power text-default",
+            component: Auth(LogoutPage, true),
+            layout: "/auth",
+        }
+    );
+} else {
+    routes.push(
+        {
+            path: "/login",
+            name: "Login",
+            icon: "ni ni-key-25 text-info",
+            component: Auth(Login, false),
+            layout: "/auth",
+        },
+        {
+            path: "/register",
+            name: "Register",
+            icon: "ni ni-circle-08 text-gray",
+            component: Auth(Register, false),
+            layout: "/auth",
+        }
+    );
+}
 
 export default routes;
