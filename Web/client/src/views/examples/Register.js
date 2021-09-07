@@ -17,8 +17,7 @@
 */
 
 import {useState} from "react";
-
-import axios from "axios";
+import {useDispatch} from "react-redux";
 
 // reactstrap components
 import {
@@ -35,6 +34,9 @@ import {
     InputGroupText
 } from "reactstrap";
 
+import {registerUser} from "../../_actions/user_actions";
+
+
 const Register = ({history}) => {
 
     const [Username, setUsername] = useState("");
@@ -43,6 +45,8 @@ const Register = ({history}) => {
 
     const [CheckUsername, setCheckUsername] = useState(false);
     const [CheckPassword, setCheckPassword] = useState(false);
+
+    const dispatch = useDispatch();
 
     const onChangeUsername = (e) => {
         setUsername(e.currentTarget.value);
@@ -70,18 +74,19 @@ const Register = ({history}) => {
             setCheckUsername(false);
             setCheckPassword(false);
 
-            axios.post('http://127.0.0.1:8000/users/register', user)
-                .then(response => {
-                    if (response.data && response.data.success) {
-                        history.push('/auth/login');
+            dispatch(registerUser(user))
+                .then((res) => {
+                    if (res.payload.success) {
+                        history.push("/auth/login");
                     } else {
                         alert('Fail to Register');
                     }
                 })
-                .catch(_ => {
+                .catch((err) => {
                     // status: 500
                     // statusText: "Internal Server Error"
                     // -> 기가입된 Username 을 입력하면 발생
+                    console.log(err);
                     setCheckUsername(true);
                 })
         } else if (Username) {
