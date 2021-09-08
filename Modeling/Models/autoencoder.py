@@ -1,6 +1,3 @@
-# Visualization library
-# from tqdm import tqdm
-
 # Data library
 import numpy as np
 import pandas as pd
@@ -94,7 +91,7 @@ class AutoEncoderHandler :
             print('epoch : {}'.format(epoch))
 
             running_loss = 0.0
-            for idx, (_id, _data) in tqdm(enumerate(dataloader), desc='training...') :
+            for idx, (_id, _data) in enumerate(dataloader) :
                 _data = _data.to(self.device)
 
                 optimizer.zero_grad()
@@ -136,7 +133,7 @@ class AutoEncoderHandler :
             else :
                 plylst_emb_with_bias = dict(np.load(plylst_emb_gnr_path, allow_pickle=True).item())
             
-            for idx, (_id, _data, _dnr, _dtl_dnr) in enumerate(tqdm(playlist_loader, desc='')):
+            for idx, (_id, _data, _dnr, _dtl_dnr) in enumerate(playlist_loader):
                 with torch.no_grad():
                     _data = _data.to(self.device)
                     output_with_bias = (torch.matmul(_data, plylst_embed_weight.T) + plylst_embed_bias).tolist()
@@ -150,7 +147,7 @@ class AutoEncoderHandler :
                 plylst_emb_with_bias = dict()
             else :
                 plylst_emb_with_bias = dict(np.load(plylst_emb_path, allow_pickle=True).item())
-            for idx, (_id, _data) in enumerate(tqdm(playlist_loader, desc='')):
+            for idx, (_id, _data) in enumerate(playlist_loader):
                 with torch.no_grad():
                     _data = _data.to(self.device)
                     output_with_bias = (torch.matmul(_data, plylst_embed_weight.T) + plylst_embed_bias).tolist()
