@@ -14,7 +14,7 @@ from Models.dataset import SongTagDataset, SongTagGenreDataset
 # Utils
 from Utils.file import remove_file
 from Utils.evaluate import mid_check
-from Utils.static import *
+from Utils.static import temp_fn, tmp_results_path, plylst_emb_gnr_path, plylst_emb_path
 
 
 class AutoEncoder(nn.Module):

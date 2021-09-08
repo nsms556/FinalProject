@@ -21,9 +21,9 @@ from Models.dataset import SongTagDataset, SongTagGenreDataset
 
 # Utils
 from Utils.file import load_json, write_json
-from Utils.static import *
 from Utils.preprocessing import DicGenerator, most_popular, remove_seen, most_similar, most_similar_emb
-
+from Utils.static import autoencoder_model_path, vectorizer_weights_path, plylst_emb_path, plylst_emb_gnr_path, plylst_w2v_emb_path
+from Utils.static import train_file_path, song_meta_file_path, song2id_file_path, result_file_base
 
 # CUDA
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

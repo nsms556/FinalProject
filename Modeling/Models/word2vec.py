@@ -1,5 +1,5 @@
 # Visualization library
-# from tqdm import tqdm
+from tqdm import tqdm
 
 # Data library
 import numpy as np
@@ -11,7 +11,7 @@ from gensim.models import Word2Vec
 
 # Utils
 from Utils.file import load_json
-from Utils.static import *
+from Utils.static import vectorizer_weights_path, plylst_w2v_emb_path
 
 
 class Kakao_Tokenizer :
