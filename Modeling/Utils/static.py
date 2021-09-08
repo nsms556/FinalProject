@@ -27,6 +27,8 @@ tokenize_input_file_path = 'Weights/tokenizer_input.txt'
 tmp_results_path = 'results/tmp_results.json'
 temp_fn = 'Arena_data/answers/temp.json'
 
+# Inference Test
+one_question_file_path = 'Data/one_question.json'
 
 # Deprecate
 autoencoder_score_file_path = 'Scores/scores_bias_without_gnr.npy'

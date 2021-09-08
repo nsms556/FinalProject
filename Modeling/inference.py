@@ -5,7 +5,7 @@ import pandas as pd
 from Models.recommender import Recommender
 
 # Utils
-from Utils.static import question_file_path
+from Utils.static import one_question_file_path
 
 
 if __name__ == '__main__' :
@@ -13,6 +13,6 @@ if __name__ == '__main__' :
     model = Recommender()
 
     print('Recommending...')
-    rec_list = model.inference(question_file_path, save=False)
+    rec_list = model.inference(one_question_file_path, save=False)
     print(pd.DataFrame(rec_list))
     
