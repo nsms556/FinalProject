@@ -14,5 +14,5 @@ if __name__ == '__main__' :
 
     print('Recommending...')
     rec_list = model.inference(one_question_file_path, save=False)
-    print(pd.DataFrame(rec_list))
+    print(rec_list)
     
