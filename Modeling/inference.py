@@ -13,6 +13,6 @@ if __name__ == '__main__' :
     model = Recommender()
 
     print('Recommending...')
-    rec_list = model.inference(question_file_path, False)
+    rec_list = model.inference(question_file_path, save=False)
     print(pd.DataFrame(rec_list))
     
