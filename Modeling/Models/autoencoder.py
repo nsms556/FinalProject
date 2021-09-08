@@ -87,6 +87,7 @@ class AutoEncoderHandler :
 
         remove_file(temp_fn)
 
+        print('AutoEncoder Training...')
         for epoch in range(args.epochs) :
             print('epoch : {}'.format(epoch))
 
