@@ -99,7 +99,7 @@ def mid_check(q_dataloader, model, tmp_result_path, answer_file_path, id2song_di
     remove_file(tmp_result_path)
 
     elements =[]
-    for idx, (_id, _data) in tqdm(enumerate(q_dataloader), desc='testing...') :
+    for idx, (_id, _data) in enumerate(q_dataloader) :
         with torch.no_grad() :
             _data = _data.to(device)
             output = model(_data)
