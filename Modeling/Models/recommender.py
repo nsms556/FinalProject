@@ -22,7 +22,7 @@ from Models.dataset import SongTagDataset, SongTagGenreDataset
 # Utils
 from Utils.file import load_json, write_json
 from Utils.preprocessing import DicGenerator, most_popular, remove_seen, most_similar, most_similar_emb
-from Utils.static import autoencoder_model_path, vectorizer_weights_path, plylst_emb_path, plylst_emb_gnr_path, plylst_w2v_emb_path
+from Utils.static import autoencoder_encoder_layer_path, vectorizer_weights_path, plylst_emb_path, plylst_emb_gnr_path, plylst_w2v_emb_path
 from Utils.static import train_file_path, song_meta_file_path, song2id_file_path, result_file_base
 
 # CUDA
@@ -30,7 +30,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 class Recommender(nn.Module) :
-    def __init__(self, auto_weights=autoencoder_model_path, w2v_weights=vectorizer_weights_path) :
+    def __init__(self, auto_weights=autoencoder_encoder_layer_path, w2v_weights=vectorizer_weights_path) :
         super(Recommender, self).__init__()
 
         self.autoencoder = self._load_autoencoder(auto_weights)
@@ -75,7 +75,7 @@ class Recommender(nn.Module) :
                 
                 for _id, _data, _dnr, _dtl_dnr in question_loader :
                     _data = _data.to(device)
-                    auto_emb = self.autoencoder.encoder[1](_data)
+                    auto_emb = self.autoencoder(_data)
                     auto_emb = torch.cat([auto_emb, _dnr.to(device), _dtl_dnr.to(device)], dim=1)
             else :
                 train_tensor = torch.from_numpy(self.pre_auto_emb.values).to(device)
@@ -84,7 +84,7 @@ class Recommender(nn.Module) :
 
                 for _id, _data in question_loader :
                     _data = _data.to(device)
-                    auto_emb = self.autoencoder.encoder[1](_data)
+                    auto_emb = self.autoencoder(_data)
 
         scores = torch.zeros([auto_emb.shape[0], train_tensor.shape[0]], dtype=torch.float64).to(device)
         for idx, vector in enumerate(auto_emb) :
