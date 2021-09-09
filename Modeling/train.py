@@ -35,8 +35,8 @@ if __name__ == '__main__' :
     question_data = load_json(question_file_path)
     answer_data = load_json(answer_file_path)
 
-    train_dataset = SongTagDataset(pd.read_json(train_file_path))
-    question_dataset = SongTagDataset(pd.read_json(question_file_path))
+    train_dataset = SongTagDataset(train_data)
+    question_dataset = SongTagDataset(train_data)
 
     print('Create Embedding Handlers')
     autoencoder_handler = AutoEncoderHandler()

@@ -113,7 +113,7 @@ class Word2VecHandler :
         if model_path != None :
             self.vectorizer.load_model(model_path)
 
-    def make_input4tokenizer(self, train_file_path, genre_file_path):
+    def make_input4tokenizer(self, train_data, genre_file_path):
         def _wv_genre(genre):
             genre_dict = dict()
             for code, value in genre:
@@ -137,8 +137,6 @@ class Word2VecHandler :
             return genre_sentences
 
         try:
-            playlists = load_json(train_file_path)
-
             genre_all = load_json(genre_file_path)
             genre_all_lists = []
             for code, gnr in genre_all.items():
@@ -148,7 +146,7 @@ class Word2VecHandler :
             genre_stc = _wv_genre(genre_all_lists)
 
             sentences = []
-            for playlist in playlists:
+            for playlist in train_data:
                 title_stc = playlist['plylst_title']
                 tag_stc = ' '.join(playlist['tags'])
                 date_stc = ' '.join(playlist['updt_date'][:7].split('-'))
