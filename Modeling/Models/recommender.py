@@ -53,7 +53,7 @@ class Recommender(nn.Module) :
         vectors = Vectors(name=model_path)
         embedding = nn.Embedding.from_pretrained(vectors.vectors, freeze=False).to(device)
 
-        return embedding, pd.Series(vectors.stoi)
+        return embedding, dict(vectors.stoi)
 
     def _load_dictionary(self) :
         train_data = load_json(train_file_path)
