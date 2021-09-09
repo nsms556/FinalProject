@@ -4,10 +4,6 @@ answer_file_path = 'Data/answer.json'
 question_file_path = 'Data/question.json'
 genre_meta_file_path = 'Lib/genre_gn_all.json'
 song_meta_file_path = 'Lib/song_meta.json'
-result_file_path = 'Results/results.json'
-
-question_file_base = 'Data/question_{}.json'
-result_file_base = 'Results/results_{}.json'
 
 tag2id_file_path = 'Lib/tag2id.npy'
 id2tag_file_path = 'Lib/id2tag.npy'
@@ -21,6 +17,8 @@ vectorizer_weights_path = 'Weights/w2v.weights'
 plylst_emb_path = 'Lib/plylst_emb.npy'
 plylst_emb_gnr_path = 'Lib/plylst_emb_gnr.npy'
 plylst_w2v_emb_path = 'Lib/plylst_w2v_emb.npy'
+
+result_file_base = 'Results/results_{}.json'
 
 
 # Train Only

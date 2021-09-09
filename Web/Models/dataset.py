@@ -13,8 +13,8 @@ from Utils.static import song_meta_file_path, genre_meta_file_path, tag2id_file_
 
 
 class SongTagDataset(Dataset):
-    def __init__(self, dataframe:pd.DataFrame):
-        self.train = dataframe
+    def __init__(self, json_data):
+        self.train = json_data
         self.tag2id = dict(np.load(tag2id_file_path, allow_pickle=True).item())
         self.song2id = dict(np.load(song2id_file_path, allow_pickle=True).item())
         self.num_songs = len(self.song2id)
@@ -27,11 +27,10 @@ class SongTagDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        _id = self.train.iloc[idx]['id']
-        song_vector = self._song_ids2vec(self.train.iloc[idx]['songs'])
-        tag_vector = self._tag_ids2vec(self.train.iloc[idx]['tags'])
-        _input = torch.from_numpy(
-            np.concatenate([song_vector, tag_vector]).astype(np.float32))
+        _id = self.train[idx]['id']
+        song_vector = self._song_ids2vec(self.train[idx]['songs'])
+        tag_vector = self._tag_ids2vec(self.train[idx]['tags'])
+        _input = torch.from_numpy(np.concatenate([song_vector, tag_vector]).astype(np.float32))
 
         return _id, _input
 
@@ -52,8 +51,8 @@ class SongTagDataset(Dataset):
         return np.array(bin_vec)
 
 class SongTagGenreDataset(Dataset):
-    def __init__(self, dataframe):
-        self.train = dataframe
+    def __init__(self, json_data):
+        self.train = json_data
         self.tag2id = dict(np.load(tag2id_file_path, allow_pickle=True).item())
         self.song2id = dict(np.load(song2id_file_path, allow_pickle=True).item())
         self.num_songs = len(self.song2id)
@@ -67,11 +66,11 @@ class SongTagGenreDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        _id = self.train.iloc[idx]['id']
-        song_vector = self._song_ids2vec(self.train.iloc[idx]['songs'])
-        tag_vector = self._tag_ids2vec(self.train.iloc[idx]['tags'])
-        gnr_vector = torch.from_numpy(self._get_gnr_vector(self.train.iloc[idx]['songs'], self.gnr_code, self.gnr_dic, self.song_gnr_dic))
-        dtl_gnr_vector = torch.from_numpy(self._get_dtl_gnr_vector(self.train.iloc[idx]['songs'], self.dtl_gnr_code, self.dtl_dic, self.song_dtl_dic))
+        _id = self.train[idx]['id']
+        song_vector = self._song_ids2vec(self.train[idx]['songs'])
+        tag_vector = self._tag_ids2vec(self.train[idx]['tags'])
+        gnr_vector = torch.from_numpy(self._get_gnr_vector(self.train[idx]['songs'], self.gnr_code, self.gnr_dic, self.song_gnr_dic))
+        dtl_gnr_vector = torch.from_numpy(self._get_dtl_gnr_vector(self.train[idx]['songs'], self.dtl_gnr_code, self.dtl_dic, self.song_dtl_dic))
         _input = torch.from_numpy(np.concatenate([song_vector, tag_vector]).astype(np.float32))
 
         return _id, _input, gnr_vector, dtl_gnr_vector
