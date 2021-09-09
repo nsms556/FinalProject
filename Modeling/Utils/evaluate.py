@@ -1,5 +1,5 @@
 # Visualization library
-# from tqdm import tqdm
+from tqdm import tqdm
 
 # CLI library
 import fire
@@ -99,7 +99,7 @@ def mid_check(q_dataloader, model, tmp_result_path, answer_file_path, id2song_di
     remove_file(tmp_result_path)
 
     elements =[]
-    for idx, (_id, _data) in enumerate(q_dataloader) :
+    for idx, (_id, _data) in enumerate(tqdm(q_dataloader)) :
         with torch.no_grad() :
             _data = _data.to(device)
             output = model(_data)

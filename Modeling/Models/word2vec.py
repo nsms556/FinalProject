@@ -37,7 +37,7 @@ class Kakao_Tokenizer :
             return []
 
         result = self.tokenizer.analyze(title)
-        result = [(morph.lex, morph.tag) for split in tqdm(result) for morph in split.morphs]  # (형태소, 품사) 튜플의 리스트
+        result = [(morph.lex, morph.tag) for split in result for morph in split.morphs]  # (형태소, 품사) 튜플의 리스트
         
         return result
 
@@ -146,6 +146,7 @@ class Word2VecHandler :
             genre_stc = _wv_genre(genre_all_lists)
 
             sentences = []
+            plylsts = pd.DataFrame(train_data)
             for playlist in train_data:
                 title_stc = playlist['plylst_title']
                 tag_stc = ' '.join(playlist['tags'])
