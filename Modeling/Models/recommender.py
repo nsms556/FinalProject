@@ -65,6 +65,8 @@ class Recommender(nn.Module) :
         _, self.tag_popular = most_popular(train_data, 'tags', 20)
     
     def similarity_by_auto(self, question_data, genre:bool) :
+        q_id = pd.DataFrame(question_data)['id']
+
         with torch.no_grad() :
             if genre :
                 train_tensor = torch.from_numpy(self.pre_auto_emb_gnr.values).to(device)
@@ -92,13 +94,13 @@ class Recommender(nn.Module) :
         scores = torch.sort(scores, descending=True)
         sorted_scores, sorted_idx = scores.values.cpu().numpy(), scores.indices.cpu().numpy()
 
-        s = pd.DataFrame(sorted_scores, index=[_id])
+        s = pd.DataFrame(sorted_scores, index=q_id)
         if genre :
-            i = pd.DataFrame(sorted_idx, index=[_id]).applymap(lambda x : self.pre_auto_emb_gnr.index[x])
+            i = pd.DataFrame(sorted_idx, index=q_id).applymap(lambda x : self.pre_auto_emb_gnr.index[x])
         else :
-            i = pd.DataFrame(sorted_idx, index=[_id]).applymap(lambda x : self.pre_auto_emb.index[x])
+            i = pd.DataFrame(sorted_idx, index=q_id).applymap(lambda x : self.pre_auto_emb.index[x])
 
-        return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in [_id]], index=[_id])        
+        return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in q_id], index=q_id)        
     
     def similarity_by_w2v(self, question_data) :
         def find_word_embed(words) :
