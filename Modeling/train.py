@@ -54,14 +54,11 @@ if __name__ == '__main__' :
     word2vec_handler.train_vectorizer(train_data, genre_meta_file_path, True)
     word2vec_handler.vectorizer.save_weights(vectorizer_weights_path)
 
-    print('Make plylst_emb...', end=' ')
+    print('Make plylst_emb...')
     np.save(plylst_emb_path, autoencoder_handler.autoencoder_plylsts_embeddings(train_data, False, True))
-    print('OK')
 
-    print('Make plylst_emb_gnr...', end=' ')
+    print('Make plylst_emb_gnr...')
     np.save(plylst_emb_gnr_path, autoencoder_handler.autoencoder_plylsts_embeddings(train_data, True, True))
-    print('OK')
 
-    print('Make plylst_w2v_emb...', end=' ')
+    print('Make plylst_w2v_emb...')
     np.save(plylst_w2v_emb_path, word2vec_handler.get_plylsts_embeddings(train_data, train=True))
-    print('OK')
