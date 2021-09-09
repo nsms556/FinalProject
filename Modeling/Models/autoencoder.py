@@ -110,7 +110,6 @@ class AutoEncoderHandler :
                 mid_check(q_dataloader, self.model, tmp_results_path, answer_file_path, id2song_dict, id2tag_dict, self.is_cuda, num_songs)
 
     def autoencoder_plylsts_embeddings(self, playlist_data, genre=False, train=True):
-        playlist_data = pd.DataFrame(playlist_data)
         if genre:
             playlist_dataset = SongTagGenreDataset(playlist_data)
         else:

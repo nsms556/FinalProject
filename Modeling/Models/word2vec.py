@@ -37,7 +37,7 @@ class Kakao_Tokenizer :
             return []
 
         result = self.tokenizer.analyze(title)
-        result = [(morph.lex, morph.tag) for split in result for morph in split.morphs]  # (형태소, 품사) 튜플의 리스트
+        result = [(morph.lex, morph.tag) for split in tqdm(result) for morph in split.morphs]  # (형태소, 품사) 튜플의 리스트
         
         return result
 
@@ -161,23 +161,23 @@ class Word2VecHandler :
 
         return sentences
 
-    def train_vectorizer(self, train_file_path, genre_file_path, exist_tags_only=True):
+    def train_vectorizer(self, train_data, genre_file_path, exist_tags_only=True):
         print('Make Sentences')
-        sentences = self.make_input4tokenizer(train_file_path, genre_file_path)
+        sentences = self.make_input4tokenizer(train_data, genre_file_path)
         if not sentences:
             raise Exception('Sentences not found')
         
         print('Tokenizing')
         if exist_tags_only :    # kakao filtered #
-            tokenized_sentences = self.tokenizer.sentences_to_tokens(sentences, self.tokenizer.get_all_tags(pd.read_json(train_file_path)))
+            tokenized_sentences = self.tokenizer.sentences_to_tokens(sentences, self.tokenizer.get_all_tags(pd.DataFrame(train_data)))
         else :                  # kakao non-filtered #
             tokenized_sentences = self.tokenizer.sentences_to_tokens(sentences)
 
-        print("start train_vectorizer.... name : {}".format(vectorizer_weights_path))
-
+        print("Train vectorizer...")
+        print("Save Path : {}".format(vectorizer_weights_path))
         self.vectorizer = Str2Vec(tokenized_sentences, size=200, window=5, min_count=1, workers=8, sg=1, hs=1)
 
-    def get_plylsts_embeddings(self,playlist_data, exist=None, train=True):
+    def get_plylsts_embeddings(self, playlist_data, exist=None, train=True):
         print('saving embeddings')
         if train :
             t_plylst_title_tag_emb = {}  # plylst_id - vector dictionary
