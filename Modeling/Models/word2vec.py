@@ -177,7 +177,6 @@ class Word2VecHandler :
         self.vectorizer = Str2Vec(tokenized_sentences, size=200, window=5, min_count=1, workers=8, sg=1, hs=1)
 
     def get_plylsts_embeddings(self, playlist_data, exist=None, train=True):
-        print('saving embeddings')
         if train :
             t_plylst_title_tag_emb = {}  # plylst_id - vector dictionary
         else :

@@ -17,7 +17,7 @@ from Models.dataset import SongTagDataset, SongTagGenreDataset
 # Utils
 from Utils.file import remove_file
 from Utils.evaluate import mid_check
-from Utils.static import temp_fn, tmp_results_path, plylst_emb_gnr_path, plylst_emb_path
+from Utils.static import temp_fn, tmp_results_path, plylst_emb_gnr_path, plylst_emb_path, autoencoder_model_path, autoencoder_encoder_layer_path
 
 
 class AutoEncoder(nn.Module):
@@ -113,6 +113,9 @@ class AutoEncoderHandler :
                 print('Runing evaluating...')
                 #mid_check(q_dataloader, self.model, tmp_results_path, answer_file_path, id2song_dict, id2tag_dict, self.is_cuda, num_songs)
 
+            self.save_model(autoencoder_model_path)
+            self.export_encoder_layer(autoencoder_encoder_layer_path)
+
     def autoencoder_plylsts_embeddings(self, playlist_data, genre=False, train=True):
         if genre:
             playlist_dataset = SongTagGenreDataset(playlist_data)
@@ -137,7 +140,7 @@ class AutoEncoderHandler :
             else :
                 plylst_emb_with_bias = dict(np.load(plylst_emb_gnr_path, allow_pickle=True).item())
             
-            for idx, (_id, _data, _dnr, _dtl_dnr) in enumerate(playlist_loader):
+            for idx, (_id, _data, _dnr, _dtl_dnr) in enumerate(tqdm(playlist_loader)):
                 with torch.no_grad():
                     _data = _data.to(self.device)
                     output_with_bias = (torch.matmul(_data, plylst_embed_weight.T) + plylst_embed_bias).tolist()
@@ -151,7 +154,7 @@ class AutoEncoderHandler :
                 plylst_emb_with_bias = dict()
             else :
                 plylst_emb_with_bias = dict(np.load(plylst_emb_path, allow_pickle=True).item())
-            for idx, (_id, _data) in enumerate(playlist_loader):
+            for idx, (_id, _data) in enumerate(tqdm(playlist_loader)):
                 with torch.no_grad():
                     _data = _data.to(self.device)
                     output_with_bias = (torch.matmul(_data, plylst_embed_weight.T) + plylst_embed_bias).tolist()
