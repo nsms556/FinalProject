@@ -15,3 +15,7 @@ Data/
 *.zip
 *.npy
 *.json
+
+
+# Test #
+!Test/*
