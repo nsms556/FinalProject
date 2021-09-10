@@ -1,23 +1,16 @@
-import React from "react";
-import {
-    Button,
-    Card,
-    CardHeader,
-    Col,
-    Container,
-    Input,
-    InputGroup,
-    InputGroupAddon,
-    InputGroupText,
-    Row
-} from "reactstrap";
+import React, {useState} from "react";
+import {Card, Container, Row} from "reactstrap";
 
 import Header from "../../components/Headers/Header";
+import SongInfo from "../../components/SongInfo";
 
-import SongInfo from "../../components/SongItems/SongInfo";
+import SearchBox from "./Sections/SearchBox";
 
 
 function SearchPage() {
+
+    const [SongList, setSongList] = useState(null);
+
     return (
         <>
             <Header/>
@@ -25,27 +18,10 @@ function SearchPage() {
                 <Row>
                     <div className="col">
                         <Card className="shadow">
-                            <CardHeader className="border-0">
-                                <Row>
-                                    <Col xs="9">
-                                        <InputGroup className="mb-4">
-                                            <InputGroupAddon addonType="prepend">
-                                                <InputGroupText>
-                                                    <i className="ni ni-note-03"/>
-                                                </InputGroupText>
-                                            </InputGroupAddon>
-                                            <Input placeholder="Search" type="text"/>
-                                        </InputGroup>
-                                    </Col>
-                                    <Col xs="1">
-                                        <Button color="info" outline type="button" className="mb-4">
-                                            Search
-                                        </Button>
-                                    </Col>
-                                </Row>
-                            </CardHeader>
-                            {/* Song Info */}
-                            <SongInfo/>
+                            <SearchBox getSongList={setSongList}/>
+                            {
+                                SongList ? (<SongInfo song_list={SongList}/>) : null
+                            }
                         </Card>
                     </div>
                 </Row>
