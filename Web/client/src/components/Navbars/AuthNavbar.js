@@ -30,9 +30,7 @@ const AdminNavbar = () => {
                     <NavbarBrand to="/" tag={Link}>
                         <img
                             alt="..."
-                            src={
-                                require("../../assets/img/brand/argon-react-white.png").default
-                            }
+                            src="/images/logo.png"
                         />
                     </NavbarBrand>
                     <UncontrolledCollapse navbar toggler="#navbar-collapse-main">
@@ -42,10 +40,7 @@ const AdminNavbar = () => {
                                     <Link to="/">
                                         <img
                                             alt="..."
-                                            src={
-                                                require("../../assets/img/brand/argon-react.png")
-                                                    .default
-                                            }
+                                            src="/images/logo.png"
                                         />
                                     </Link>
                                 </Col>
