@@ -81,10 +81,7 @@ def show_inference(request):
     if request.method == 'POST':
         try:
             body = json.loads(request.body.decode('utf-8'))
-            
-            t = dt.datetime.now().strftime("%y%m%d-%H%M%S")
-            write_json(body, question_file_base.format(t))
-            output = inference(question_file_base.format(t), model, result_file_base.format(t))
+            output = inference(body, model, result_file_base.format(dt.datetime.now().strftime("%y%m%d-%H%M%S")))
 
             '''
                 question_dataset = body

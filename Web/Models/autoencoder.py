@@ -1,3 +1,6 @@
+# Visualization library
+#from tqdm import tqdm
+
 # Data library
 import numpy as np
 import pandas as pd
@@ -14,7 +17,7 @@ from Models.dataset import SongTagDataset, SongTagGenreDataset
 # Utils
 from Utils.file import remove_file
 from Utils.evaluate import mid_check
-from Utils.static import temp_fn, tmp_results_path, plylst_emb_gnr_path, plylst_emb_path
+from Utils.static import temp_fn, tmp_results_path, plylst_emb_gnr_path, plylst_emb_path, autoencoder_model_path, autoencoder_encoder_layer_path
 
 
 class AutoEncoder(nn.Module):
@@ -107,10 +110,13 @@ class AutoEncoderHandler :
             print('loss: {:.4f} \n'.format(running_loss))
 
             if epoch % check_every == 0 and question_dataset is not None :
-                mid_check(q_dataloader, self.model, tmp_results_path, answer_file_path, id2song_dict, id2tag_dict, self.is_cuda, num_songs)
+                print('Runing evaluating...')
+                #mid_check(q_dataloader, self.model, tmp_results_path, answer_file_path, id2song_dict, id2tag_dict, self.is_cuda, num_songs)
+
+            self.save_model(autoencoder_model_path)
+            self.export_encoder_layer(autoencoder_encoder_layer_path)
 
     def autoencoder_plylsts_embeddings(self, playlist_data, genre=False, train=True):
-        playlist_data = pd.DataFrame(playlist_data)
         if genre:
             playlist_dataset = SongTagGenreDataset(playlist_data)
         else:

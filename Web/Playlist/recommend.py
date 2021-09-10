@@ -1,8 +1,8 @@
 # Utils
 from Utils.file import write_json
 
-def inference(question_data_path, model, result_path) :
-    element = model.inference(question_data_path, save=False)
+def inference(question_data, model, result_path) :
+    element = model.inference(question_data, save=False)
             
     write_json(element, result_path)
     return element
