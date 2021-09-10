@@ -33,23 +33,20 @@ def index(request):
     elif request.method == 'POST':
         try:
             body = json.loads(request.body.decode('utf-8'))
-            song_title = body['song_title']
-            artist = body['artist']
+            type = body['type']
+            word = body['word']
 
             conn = sqlite3.connect('data.db')
             cur = conn.cursor()
-            if song_title and artist:
+            
+            if type == "song_name":
                 cur.execute(f"select id, song_name, artist_name_basket, album_name, album_id, issue_date \
                         from song_meta \
-                        where song_name LIKE '%{song_title}%' and artist_name_basket LIKE '%{artist}%'")
-            elif song_title and not artist:
-                cur.execute(f"select id, song_name, artist_name_basket, album_name, album_id, issue_date \
-                        from song_meta \
-                        where song_name LIKE '%{song_title}%'")
+                        where song_name LIKE '%{word}%'")
             else:
                 cur.execute(f"select id, song_name, artist_name_basket, album_name, album_id, issue_date \
                         from song_meta \
-                        where artist_name_basket LIKE '%{artist}%'")
+                        where artist_name_basket LIKE '%{word}%'")
             output = []
             rows = cur.fetchall()
             for row in rows:
