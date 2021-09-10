@@ -12,5 +12,6 @@ urlpatterns = [
     path('login', views.signin, name='login'),
     path('logout', views.signout, name='logout'),
 
-    path('select_gnr', views.SelectGnr, name='select_gnr')
+    path('select_gnr', views.SelectGnr, name='select_gnr'),
+    path('select_song', views.SelectSong, name='select_song')
 ]

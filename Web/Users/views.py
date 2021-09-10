@@ -8,29 +8,69 @@ from django.contrib.auth import authenticate, login, logout
 import json
 import sqlite3
 
+@method_decorator(csrf_exempt, name='dispatch')
 def index(request):
-    # 마이페이지 (사용자 호/불호 장르, 태그, 가수 조회)
     
+    # 마이페이지 (사용자 호/불호 장르, 태그, 가수 조회)
     if request.method == 'GET':
         try:
-            output = []
             u_id = request.session['u_id']
             conn = sqlite3.connect('data.db')
             cur = conn.cursor()
-            cur.execute(f"select * from user_gnr where user_id = {u_id}")
+            query = f"""
+                select a.id, a.song_name, a.artist_name_basket, a.issue_date
+                from song_meta a, usr_song b
+                where b.u_id = {u_id} and a.id = b.song_id and b.isLike=0
+            """
+            cur.execute(query)
+            dislike_songs = []
+            for row in cur.fetchall():
+                content = {
+                    'song_id': row[0],
+                    'song_name': row[1],
+                    'artist_name': row[2],
+                    'issue_date': row[3]
+                }
+                dislike_songs.append(content)
+
+            query = f"""
+                select a.id, a.song_name, a.artist_name_basket, a.issue_date
+                from song_meta a, usr_song b
+                where b.u_id = {u_id} and a.id = b.song_id and b.isLike=1
+            """
+            cur.execute(query)
             rows = cur.fetchall()
+            like_songs = []
             for row in rows:
                 content = {
-                    'u_id' : row[0],
-                    'gnr_id': row[1],
-                    'gnr_code': row[2],
-                    'isLike': row[3]
+                    'song_id': row[0],
+                    'song_name': row[1],
+                    'artist_name': row[2],
+                    'issue_date': row[3]
                 }
-                output.append(content)
-            return JsonResponse({"output": output}, json_dumps_params={'ensure_ascii': True}) 
+                like_songs.append(content)
+            
+            return JsonResponse({"success": True, "like": like_songs, "dislike": dislike_songs}, json_dumps_params={'ensure_ascii': True}) 
 
         except KeyError as e:
-            # 홈으로 리다이랙트하는 방법으로 교체할 것
+            # 홈으로 리다이랙트
+            return JsonResponse({"success": False, "error": str(type(e))})
+
+    elif request.method == 'POST':
+        try:
+            u_id = request.session['u_id']
+            body = json.loads(request.body.decode('utf-8'))
+            conn = sqlite3.connect('data.db')
+            cur = conn.cursor()
+            query = f"""
+                delete from usr_song where u_id = {u_id} and song_id = {body["song_id"]}
+            """
+            cur.execute(query)
+            conn.commit()
+            return JsonResponse({"success": True}, json_dumps_params={'ensure_ascii': True}) 
+
+        except KeyError as e:
+            # 홈으로 리다이랙트
             return JsonResponse({"success": False, "error": str(type(e))})
 
     
@@ -130,3 +170,23 @@ def SelectGnr(request):
 
         except KeyError as e:
             return JsonResponse({'success':False, 'error': str(type(e))}, json_dumps_params={'ensure_ascii': True})
+
+# usr_song
+@method_decorator(csrf_exempt, name='dispatch')
+def SelectSong(request):
+    conn = sqlite3.connect('data.db')
+    cur = conn.cursor()
+    
+    # 호/불호 노래 입력 (이부분 추천쿼리 돌리기 전에 한번에 받을지)
+    if request.method == 'POST':
+        try:
+            u_id = request.session['u_id']
+            body = json.loads(request.body.decode('utf-8'))
+            query = f"""
+                INSERT into usr_song values({u_id}, {body["song_id"]}, {body["isLike"]})
+            """
+            cur.execute(query)
+            conn.commit()
+            return JsonResponse({"success":True, "song": body["song_id"]}, json_dumps_params={'ensure_ascii': True}) 
+        except KeyError as e:
+            return JsonResponse({"success": False, "error": str(type(e))})
