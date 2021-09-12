@@ -23,10 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = open('secret.txt')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # 탄력적 ip
-ALLOWED_HOSTS = ['3.34.233.164']
+ALLOWED_HOSTS = []
 
 
 # Application definition
