@@ -4,12 +4,12 @@ from Utils.preprocessing import remove_seen
 
 def inference(question_data, model, result_path) :
     question_data = question_data[0]
-    
+
     like_data = [question_data['like']]
     dislike_data = [question_data['dislike']]
     
-    like = model.inference(like_data, save=False)
-    dislike = model.inference(dislike_data, save=False)
+    like = model.inference(like_data, save=False)[0]
+    dislike = model.inference(dislike_data, save=False)[0]
     
     true_like_songs = remove_seen(dislike['songs'], like['songs'])
     maybe_like_songs = list(set(like['songs']) & set(dislike['songs']))
