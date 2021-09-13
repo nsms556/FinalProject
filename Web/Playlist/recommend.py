@@ -3,8 +3,10 @@ from Utils.file import write_json
 from Utils.preprocessing import remove_seen
 
 def inference(question_data, model, result_path) :
-    like_data = question_data['like']
-    dislike_data = question_data['dislike']
+    question_data = question_data[0]
+    
+    like_data = [question_data['like']]
+    dislike_data = [question_data['dislike']]
     
     like = model.inference(like_data, save=False)
     dislike = model.inference(dislike_data, save=False)
