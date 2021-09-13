@@ -11,9 +11,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 import sqlite3
+import webbrowser
+import urllib.request
+import urllib.parse
 
-from Utils.file import write_json
-from Utils.static import question_file_base, result_file_base
+from Utils.static import result_file_base
 from Models.recommender import Recommender
 
 from Playlist.recommend import inference
@@ -64,10 +66,22 @@ def index(request):
             return # redirect home
     
 
-# '/detail' 플레이리스트 내부 곡 정보
+# '/detail' 곡 세부정보
 @method_decorator(csrf_exempt, name='dispatch')
 def detail(request):
-    return JsonResponse({'success': True}, json_dumps_params={'ensure_ascii': True})
+    if request.method == 'POST':
+        try:
+            body = json.loads(request.body.decode('utf-8'))
+
+            playlink = "https://www.youtube.com/results?search_query="
+            encode = urllib.parse.quote_plus(body['artist_name']) + "+" + "+".join(urllib.parse.quote_plus(body['song_name']).split())
+            playlink += encode
+            webbrowser.open(playlink)
+            return JsonResponse({'success': True, 'playlink':playlink}, json_dumps_params={'ensure_ascii': True})
+
+        except (KeyError, JSONDecodeError, ValueError) as e:
+            return JsonResponse({'success':False}, json_dumps_params={'ensure_ascii': True})
+
     
 @method_decorator(csrf_exempt, name='dispatch')
 def show_inference(request):
@@ -82,7 +96,7 @@ def show_inference(request):
         try:
             body = json.loads(request.body.decode('utf-8'))
             output = inference(body, model, result_file_base.format(dt.datetime.now().strftime("%y%m%d-%H%M%S")))
-
+            
             '''
                 question_dataset = body
                 question_dataset = SongTagDataset(question_dataset, tag2id_file_path, prep_song2id_file_path)
@@ -90,7 +104,7 @@ def show_inference(request):
 
                 output = inference(question_dataloader, model, result_path, id2song_dict, id2tag_dict)
             '''
-
+            '''
             song_list = []
 
             for song in output['songs'][0]:
@@ -111,7 +125,7 @@ def show_inference(request):
                         'dtl_gnr': row[7]
                     }
                     song_list.append(content)
-
-            return JsonResponse({'song_list': song_list}, json_dumps_params={'ensure_ascii': True})
+            '''
+            return JsonResponse({'ouput': output}, json_dumps_params={'ensure_ascii': True})
         except (KeyError, JSONDecodeError, ValueError) as e:
-            pass
+            return JsonResponse({'ouput': e}, json_dumps_params={'ensure_ascii': True})
