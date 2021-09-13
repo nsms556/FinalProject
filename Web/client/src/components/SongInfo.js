@@ -24,6 +24,11 @@ const SongInfo = (props) => {
             Dislikes.add(id);
             setDislikes(Dislikes);
         }
+
+        if (props.onSyncList) {
+
+            props.onSyncList([...Likes], [...Dislikes]);
+        }
     };
 
     const deleteSong = (id) => {
