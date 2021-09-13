@@ -18,6 +18,7 @@ from Utils.preprocessing import song_filter_by_freq, tags_encoding
 
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
+    parser.add_argument('-train_data', type=str, help='Train Dataset File Path', default=train_file_path)
     parser.add_argument('-dimension', type=int, help="hidden layer dimension", default=450)
     parser.add_argument('-epochs', type=int, help="total epochs", default=40)
     parser.add_argument('-batch_size', type=int, help="batch size", default=256)
@@ -30,7 +31,7 @@ if __name__ == '__main__' :
     args = parser.parse_args()
 
     print('Load data')
-    train_data = load_json(train_file_path)
+    train_data = load_json(args.train_data)
     question_data = load_json(question_file_path)
     answer_data = load_json(answer_file_path)
 
