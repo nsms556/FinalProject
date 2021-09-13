@@ -45,7 +45,7 @@ class Recommender(nn.Module) :
         self._load_dictionary()
 
     def _load_autoencoder(self, model_path) :
-        autoencoder = torch.load(model_path)
+        autoencoder = torch.load(model_path, map_location=torch.device('cpu'))
 
         return autoencoder
 

@@ -16,7 +16,7 @@ from Models.dataset import SongTagDataset, SongTagGenreDataset
 
 # Utils
 from Utils.file import remove_file
-from Utils.evaluate import mid_check
+# from Utils.evaluate import mid_check
 from Utils.static import temp_fn, tmp_results_path, plylst_emb_gnr_path, plylst_emb_path, autoencoder_model_path, autoencoder_encoder_layer_path
 
 
@@ -57,7 +57,7 @@ class AutoEncoderHandler :
         self.model = AutoEncoder(D_in, args.dimension, D_out, dropout=args.dropout).to(self.device)
 
     def load_model(self, model_path) :
-        self.model = torch.load(model_path)
+        self.model = torch.load(model_path, map_location=torch.device('cpu'))
         
     def save_model(self, model_path) :
         torch.save(self.model, model_path)
