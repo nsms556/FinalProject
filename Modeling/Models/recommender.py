@@ -4,6 +4,7 @@
 # python standard library
 import datetime as dt
 from collections import Counter, defaultdict
+import time
 
 # Data library
 import numpy as np
@@ -45,7 +46,7 @@ class Recommender(nn.Module) :
         self._load_dictionary()
 
     def _load_autoencoder(self, model_path) :
-        autoencoder = torch.load(model_path)
+        autoencoder = torch.load(model_path, map_location=device)
 
         return autoencoder
 
@@ -65,6 +66,7 @@ class Recommender(nn.Module) :
         _, self.tag_popular = most_popular(train_data, 'tags', 20)
     
     def similarity_by_auto(self, question_data, genre:bool) :
+        start_time = time.time()
         q_id = pd.DataFrame(question_data)['id']
 
         with torch.no_grad() :
@@ -85,6 +87,8 @@ class Recommender(nn.Module) :
                 for _id, _data in question_loader :
                     _data = _data.to(device)
                     auto_emb = self.autoencoder(_data)
+                    
+        print('torch matmul time : {}'.format(time.time() - start_time))
 
         scores = torch.zeros([auto_emb.shape[0], train_tensor.shape[0]], dtype=torch.float64).to(device)
         for idx, vector in enumerate(auto_emb) :
@@ -94,11 +98,15 @@ class Recommender(nn.Module) :
         scores = torch.sort(scores, descending=True)
         sorted_scores, sorted_idx = scores.values.cpu().numpy(), scores.indices.cpu().numpy()
 
+        print('score+sort : {}'.format(time.time() - start_time))
+        
         s = pd.DataFrame(sorted_scores, index=q_id)
         if genre :
             i = pd.DataFrame(sorted_idx, index=q_id).applymap(lambda x : self.pre_auto_emb_gnr.index[x])
         else :
             i = pd.DataFrame(sorted_idx, index=q_id).applymap(lambda x : self.pre_auto_emb.index[x])
+
+        print('pandas : {}'.format(time.time() - start_time))
 
         return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in q_id], index=q_id)        
     
@@ -112,6 +120,7 @@ class Recommender(nn.Module) :
                     pass
                 
             return ret
+        start_time = time.time()
         question_df = pd.DataFrame(question_data)
 
         p_ids = question_df['id']
@@ -121,6 +130,8 @@ class Recommender(nn.Module) :
 
         question_df['tokens'] = p_token + p_tags + p_dates
         question_df['emb_input'] = question_df['tokens'].map(lambda x : find_word_embed(x))
+
+        print('preprocess : {}'.format(time.time() - start_time))
 
         outputs = []
         for e in question_df['emb_input'] :
@@ -136,6 +147,8 @@ class Recommender(nn.Module) :
 
         train_tensor = torch.from_numpy(self.pre_w2v_emb.values).to(device)
 
+        print('calculate layer : {}'.format(time.time() - start_time))
+
         scores = torch.zeros([outputs.shape[0], train_tensor.shape[0]], dtype=torch.float64).to(device)
         for idx, vector in enumerate(outputs) :
             output = self.cos(vector.reshape(1, -1), train_tensor)
@@ -144,8 +157,12 @@ class Recommender(nn.Module) :
         scores = torch.sort(scores, descending=True)
         sorted_scores, sorted_idx = scores.values.cpu().numpy(), scores.indices.cpu().numpy()
 
+        print('score+sort : {}'.format(time.time() - start_time))
+
         s = pd.DataFrame(sorted_scores, index=p_ids)
-        i = pd.DataFrame(sorted_idx, index=p_ids).applymap(lambda x : self.pre_w2v_emb.index[x])        
+        i = pd.DataFrame(sorted_idx, index=p_ids).applymap(lambda x : self.pre_w2v_emb.index[x])
+
+        print('pandas : {}'.format(time.time() - start_time))
 
         return pd.DataFrame([pd.Series(list(zip(i.loc[idx], s.loc[idx]))) for idx in p_ids], index=p_ids)        
 
