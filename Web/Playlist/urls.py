@@ -8,5 +8,6 @@ app_name = 'Playlist'
 urlpatterns = [
     path('', views.index, name='index'),
     path('detail', views.detail, name='detail'),
-    path('recommend', views.show_inference, name='recommend')
+    path('recommend', views.show_inference, name='recommend'),
+    path('songs', views.show_songs, name="songs")
 ]
