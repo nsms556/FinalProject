@@ -17,20 +17,19 @@
 */
 
 // reactstrap components
-import {Button, Col, Container, Row} from "reactstrap";
+import {Col, Container, Row} from "reactstrap";
 
 
 const UserHeader = () => {
+
+    const username = window.localStorage.getItem('username');
+
     return (
         <>
             <div
                 className="header pb-8 pt-5 pt-lg-8 d-flex align-items-center"
                 style={{
                     minHeight: "600px",
-                    backgroundImage:
-                        "url(" +
-                        require("../../assets/img/theme/profile-cover.jpg").default +
-                        ")",
                     backgroundSize: "cover",
                     backgroundPosition: "center top",
                 }}
@@ -40,19 +39,12 @@ const UserHeader = () => {
                 {/* Header container */}
                 <Container className="d-flex align-items-center" fluid>
                     <Row>
-                        <Col lg="7" md="10">
-                            <h1 className="display-2 text-white">Hello Jesse</h1>
+                        <Col>
+                            <h1 className="display-2 text-white">Hello {username} ❣</h1>
                             <p className="text-white mt-0 mb-5">
-                                This is your profile page. You can see the progress you've made
-                                with your work and manage your projects or assigned tasks
+                                지금까지 평가한 곡을 확인할 수 있습니다.<br/>
+                                좋아하는 곡과 좋아하지 않는 곡을 편집할 수 있습니다.
                             </p>
-                            <Button
-                                color="info"
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                            >
-                                Edit profile
-                            </Button>
                         </Col>
                     </Row>
                 </Container>
