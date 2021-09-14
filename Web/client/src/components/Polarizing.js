@@ -49,9 +49,9 @@ const Polarizing = (props) => {
 
     const onRemoveSong = () => {
 
-        console.log(props.id);
+        const song_id = {song_id: parseInt(props.id)};
 
-        axios.post('http://127.0.0.1:8000/users/', props.id)
+        axios.post('http://127.0.0.1:8000/users/', song_id)
             .then(response => {
                 if (response.data) {
                     window.location.replace("/admin/user-profile");
