@@ -59,11 +59,16 @@ const SongInfo = (props) => {
                 <td>
                     {song.artist}
                 </td>
-                <td>
-                    {song.album_name}
-                </td>
+                {
+                    props.btn_type !== "delete" ?
+                        (
+                            <td>
+                                {song.album_name}
+                            </td>
+                        ) : null
+                }
                 <td className="text-right">
-                    <Polarizing id={song.song_id} addList={addSongList}/>
+                    <Polarizing id={song.song_id} addList={addSongList} btn_type={props.btn_type}/>
                 </td>
             </tr>
         );
@@ -75,7 +80,9 @@ const SongInfo = (props) => {
             <tr>
                 <th scope="col">곡명</th>
                 <th scope="col">아티스트</th>
-                <th scope="col">앨범</th>
+                {
+                    props.btn_type !== "delete" ? (<th scope="col">앨범</th>) : null
+                }
                 <th scope="col"/>
             </tr>
             </thead>
