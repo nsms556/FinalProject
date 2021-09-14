@@ -1,4 +1,5 @@
-FROM python:3.8-slim-buster@sha256:112881e7ae237936857c31dc8765813069a3cea436b035780e40e217800daad5
+#FROM python:3.8-slim-buster@sha256:112881e7ae237936857c31dc8765813069a3cea436b035780e40e217800daad5
+FROM bmofinnjake08/khaiii
 WORKDIR /usr/src/app
 
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -11,7 +12,21 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 # Project files copy
-COPY . .
+# 레이어 나누는 것이 이후 빌드 속도, 빌드캐시에 좋다
+# COPY . .
+COPY Data ./Data \
+     Lib ./Lib \
+     Models ./Models \
+     Results ./Results \
+     Utils ./Utils \
+     Weights ./Weights \
+     db.sqlite3 manage.py secret.txt ./
+
+# 작성한 파일
+COPY Playlist ./Playlist 
+COPY Users ./Users 
+COPY Web ./Web
+COPY data.db ./
 
 # Port setting
 EXPOSE 8000
