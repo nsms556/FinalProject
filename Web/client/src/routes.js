@@ -70,7 +70,7 @@ if (username) {
             name: "Logout",
             icon: "ni ni-button-power text-default",
             component: Auth(LogoutPage, true),
-            layout: "/auth",
+            layout: "/admin",
         }
     );
 } else {
