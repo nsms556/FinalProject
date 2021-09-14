@@ -1,0 +1,14 @@
+version: "3.7"
+services:
+  django_web:
+    # 웹 애플리케이션 설정
+    build: .
+    ports: 
+      - "8000:8000"
+    depends_on: 
+      - khaiii
+
+  khaiii:
+    image: bmofinnjake08/khaiii
+    ports: 
+      - "8001:8000"
