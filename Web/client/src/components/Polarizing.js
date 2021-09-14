@@ -1,12 +1,31 @@
 import React, {useState} from "react";
 
-import {DislikeFilled, DislikeOutlined, LikeFilled, LikeOutlined} from "@ant-design/icons";
+import axios from "axios";
+
+import {
+    DeleteFilled,
+    DeleteOutlined,
+    DislikeFilled,
+    DislikeOutlined,
+    LikeFilled,
+    LikeOutlined
+} from "@ant-design/icons";
 
 
 const Polarizing = (props) => {
 
+    const [BtnMouseOver, setBtnMouseOver] = useState(false);
+
     const [Like, setLike] = useState(false);
     const [Dislike, setDislike] = useState(false);
+
+    const checkPolarizing = (id, like, dislike) => {
+
+        // Like 또는 Dislike 클릭하여 선택 시: false
+        // 이미 선택된 버튼을 다시 클릭하여 취소 시: true
+
+        props.addList(id, (like === 'false') ? 'like' : ((dislike === 'false') ? 'dislike' : null));
+    };
 
     const onClickLikes = (e) => {
 
@@ -28,32 +47,64 @@ const Polarizing = (props) => {
         checkPolarizing(props.id, null, e.currentTarget.value);
     };
 
-    const checkPolarizing = (id, like, dislike) => {
+    const onRemoveSong = () => {
 
-        // Like 또는 Dislike 클릭하여 선택 시: false
-        // 이미 선택된 버튼을 다시 클릭하여 취소 시: true
+        console.log(props.id);
 
-        props.addList(id, (like === 'false') ? 'like' : ((dislike === 'false') ? 'dislike' : null));
+        axios.post('http://127.0.0.1:8000/users/', props.id)
+            .then(response => {
+                if (response.data) {
+                    window.location.replace("/admin/user-profile");
+                } else {
+                    alert('노래 삭제에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    const onMouseOver = () => {
+
+        setBtnMouseOver(!BtnMouseOver);
     };
 
     return (
         <>
-            <button className={Like ? "btn btn-icon btn-danger" : "btn btn-icon btn-secondary"} type="button"
-                    value={Like} onClick={onClickLikes}>
-                    <span key="comment-basic-like">
-                        {
-                            Like ? (<LikeFilled/>) : (<LikeOutlined/>)
-                        }
-                    </span>
-            </button>
-            <button className={Dislike ? "btn btn-icon btn-default" : "btn btn-icon btn-secondary"} type="button"
-                    value={Dislike} onClick={onClickDislikes}>
-                    <span key="comment-basic-dislike">
-                        {
-                            Dislike ? (<DislikeFilled/>) : (<DislikeOutlined/>)
-                        }
-                    </span>
-            </button>
+            {
+                props.btn_type === "delete" ?
+                    (
+                        <button className={BtnMouseOver ? "btn btn-icon btn-default" : "btn btn-icon btn-secondary"}
+                                type="button" onMouseEnter={onMouseOver} onMouseLeave={onMouseOver}
+                                onClick={onRemoveSong}>
+                                <span key="comment-basic-like">
+                                    {
+                                        BtnMouseOver ? (<DeleteFilled/>) : (<DeleteOutlined/>)
+                                    }
+                                </span>
+                        </button>
+                    ) :
+                    (
+                        <>
+                            <button className={Like ? "btn btn-icon btn-danger" : "btn btn-icon btn-secondary"}
+                                    type="button" value={Like} onClick={onClickLikes}>
+                                <span key="comment-basic-like">
+                                    {
+                                        Like ? (<LikeFilled/>) : (<LikeOutlined/>)
+                                    }
+                                </span>
+                            </button>
+                            <button className={Dislike ? "btn btn-icon btn-default" : "btn btn-icon btn-secondary"}
+                                    type="button" value={Dislike} onClick={onClickDislikes}>
+                                <span key="comment-basic-dislike">
+                                    {
+                                        Dislike ? (<DislikeFilled/>) : (<DislikeOutlined/>)
+                                    }
+                                </span>
+                            </button>
+                        </>
+                    )
+            }
         </>
     );
 }
