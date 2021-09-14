@@ -11,6 +11,8 @@ const SongInfo = (props) => {
 
     const addSongList = (id, value) => {
 
+        id = parseInt(id);
+
         deleteSong(id);
 
         if (value === 'like') {
