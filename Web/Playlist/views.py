@@ -84,7 +84,24 @@ def detail(request):
         except (KeyError, JSONDecodeError, ValueError) as e:
             return JsonResponse({'success':False}, json_dumps_params={'ensure_ascii': True})
 
-    
+# 추천시 입력하는 정보(태그, 노래) 사용자_장르, 사용자_노래 테이블에 저장
+def insert_info(u_id, input_list, isLike):
+    conn = sqlite3.connect('data.db')
+    cur = conn.cursor()
+
+    tags = []
+    songs = []
+
+    for tag in input_list["tags"]:
+        tags.append((u_id, tag, isLike))
+    cur.executemany("INSERT INTO usr_gnr (u_id, gnr_name, isLike) values (?, ?, ?)", tags)
+    conn.commit()
+
+    for song_id in input_list["songs"]:
+        songs.append((u_id, song_id, isLike))
+    cur.executemany("INSERT INTO usr_song values (?, ?, ?)", songs)
+    conn.commit() 
+
 @method_decorator(csrf_exempt, name='dispatch')
 def show_inference(request):
     if request.method == 'GET':
@@ -100,34 +117,10 @@ def show_inference(request):
 
             like = body[0]["like"]
             dislike = body[0]["dislike"]
-            print(like)
-            print(dislike)
-            for tag in like["tags"]:
-                query = f"""
-                    INSERT into usr_gnr (u_id, gnr_name, isLike) values({u_id}, {tag}, 1)
-                    """
-                cur.execute(query)
-                conn.commit()
-            for song_id in like["songs"]:
-                query = f"""
-                    INSERT into usr_songs (u_id, song_id, isLike) values({u_id}, {song_id}, 1)
-                    """
-                cur.execute(query)
-                conn.commit() 
-
-            for tag in dislike["tags"]:
-                query = f"""
-                    INSERT into usr_gnr (u_id, gnr_name, isLike) values({u_id}, {tag}, 0)
-                    """
-                cur.execute(query)
-                conn.commit()
-            for song_id in dislike["songs"]:
-                query = f"""
-                    INSERT into usr_songs (u_id, song_id, isLike) values({u_id}, {song_id}, 0)
-                    """
-                cur.execute(query)
-                conn.commit()
-
+            
+            insert_info(u_id, like, 1)
+            insert_info(u_id, dislike, 0)
+            
             output = inference(body, model, result_file_base.format(u_id))
             
             # output: true_like, maybe_like
