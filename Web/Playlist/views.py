@@ -92,8 +92,41 @@ def show_inference(request):
     
     if request.method == 'POST':
         try:
+            conn = sqlite3.connect('data.db')
+            cur = conn.cursor()
+
             body = json.loads(request.body.decode('utf-8'))
             u_id = request.session['u_id']
+
+            like = body[0]["like"]
+            dislike = body[0]["dislike"]
+            print(like)
+            print(dislike)
+            for tag in like["tags"]:
+                query = f"""
+                    INSERT into usr_gnr (u_id, gnr_name, isLike) values({u_id}, {tag}, 1)
+                    """
+                cur.execute(query)
+                conn.commit()
+            for song_id in like["songs"]:
+                query = f"""
+                    INSERT into usr_songs (u_id, song_id, isLike) values({u_id}, {song_id}, 1)
+                    """
+                cur.execute(query)
+                conn.commit() 
+
+            for tag in dislike["tags"]:
+                query = f"""
+                    INSERT into usr_gnr (u_id, gnr_name, isLike) values({u_id}, {tag}, 0)
+                    """
+                cur.execute(query)
+                conn.commit()
+            for song_id in dislike["songs"]:
+                query = f"""
+                    INSERT into usr_songs (u_id, song_id, isLike) values({u_id}, {song_id}, 0)
+                    """
+                cur.execute(query)
+                conn.commit()
 
             output = inference(body, model, result_file_base.format(u_id))
             

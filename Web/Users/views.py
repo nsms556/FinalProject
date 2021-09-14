@@ -90,6 +90,7 @@ def register(request):
             # Create user and save to the database
             user = User.objects.create_user(username=username, password=password)
             user.save()
+            request.session['u_id'] = user.pk
             # return redirect('index')
             return JsonResponse({'success':True, 'name':username}, json_dumps_params={'ensure_ascii': True})
         
