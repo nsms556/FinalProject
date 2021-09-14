@@ -62,7 +62,7 @@ const Profile = () => {
                                 <h3 className="mb-0">좋아하는 곡 목록</h3>
                             </CardHeader>
                             {
-                                LikeList ? <SongInfo song_list={LikeList}/> : null
+                                LikeList ? <SongInfo btn_type="delete" song_list={LikeList}/> : null
                             }
                         </Card>
                     </Col>
@@ -72,7 +72,7 @@ const Profile = () => {
                                 <h3 className="mb-0">좋아하지 않는 곡 목록</h3>
                             </CardHeader>
                             {
-                                DislikeList ? <SongInfo song_list={DislikeList}/> : null
+                                DislikeList ? <SongInfo btn_type="delete" song_list={DislikeList}/> : null
                             }
                         </Card>
                     </Col>
