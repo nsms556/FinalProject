@@ -14,7 +14,7 @@ const LogoutPage = () => {
             .then((res) => {
                 if (res.payload.success) {
                     window.localStorage.removeItem('username');
-                    window.location.replace("/");
+                    window.location.replace("/admin/index");
                 } else {
                     alert("로그아웃에 실패했습니다.");
                 }
