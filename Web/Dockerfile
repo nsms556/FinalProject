@@ -12,15 +12,8 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 # Project files copy
-# 레이어 나누는 것이 이후 빌드 속도, 빌드캐시에 좋다
-# COPY . .
-COPY Data ./Data \
-     Lib ./Lib \
-     Models ./Models \
-     Results ./Results \
-     Utils ./Utils \
-     Weights ./Weights \
-     db.sqlite3 manage.py secret.txt ./
+COPY CopyFolder ./
+COPY db.sqlite3 manage.py secret.txt ./
 
 # 작성한 파일
 COPY Playlist ./Playlist 
