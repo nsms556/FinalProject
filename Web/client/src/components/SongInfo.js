@@ -68,7 +68,9 @@ const SongInfo = (props) => {
                         ) : null
                 }
                 <td className="text-right">
-                    <Polarizing id={song.song_id} addList={addSongList} btn_type={props.btn_type}/>
+                    <Polarizing id={song.song_id} addList={addSongList} btn_type={props.btn_type}
+                                like_list={props.like_list} dislike_list={props.dislike_list}
+                                is_search={props.is_search}/>
                 </td>
             </tr>
         );
