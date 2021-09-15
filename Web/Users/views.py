@@ -64,7 +64,7 @@ def find_usrSong(u_id, isLike):
         content = {
             'song_id': row[0],
             'song_name': row[1],
-            'artist_name': row[2],
+            'artist_name': (row[2][2:-2].replace("'", "")).split(','),
             'issue_date': row[3]
         }
         song_list.append(content)
