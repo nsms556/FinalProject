@@ -58,8 +58,8 @@ def index(request):
                         'song_id': row[0],
                         'song_name': row[1],
                         'artist': row[2],
-                        'album_id': row[3],
-                        'album_name': row[4],
+                        'album_name': row[3],
+                        'album_id': row[4],
                         'issue_date': row[5]
                     }
                 output.append(content)
@@ -159,7 +159,6 @@ def show_songs(request):
                     'dtl_gnr': row[7]
                 }
                 song_list.append(content)
-        print({'success':True, 'tag_list': result['tags'], 'song_list': song_list})
         return JsonResponse({'success':True, 'tag_list': result['tags'], 'song_list': song_list}, json_dumps_params={'ensure_ascii': True})
     except (KeyError, JSONDecodeError, ValueError) as e:
         return JsonResponse({'success':False, 'ouput': e}, json_dumps_params={'ensure_ascii': True})

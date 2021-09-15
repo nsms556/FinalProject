@@ -16,42 +16,15 @@ def index(request):
         try:
             u_id = request.session['u_id']
             print(f'user{u_id}: 유저페이지')
-            conn = sqlite3.connect('data.db')
-            cur = conn.cursor()
-            query = f"""
-                select a.id, a.song_name, a.artist_name_basket, a.issue_date
-                from song_meta a, usr_song b
-                where b.u_id = {u_id} and a.id = b.song_id and b.isLike=0
-            """
-            cur.execute(query)
-            dislike_songs = []
-            for row in cur.fetchall():
-                content = {
-                    'song_id': row[0],
-                    'song_name': row[1],
-                    'artist_name': row[2],
-                    'issue_date': row[3]
-                }
-                dislike_songs.append(content)
 
-            query = f"""
-                select a.id, a.song_name, a.artist_name_basket, a.issue_date
-                from song_meta a, usr_song b
-                where b.u_id = {u_id} and a.id = b.song_id and b.isLike=1
-            """
-            cur.execute(query)
-            rows = cur.fetchall()
-            like_songs = []
-            for row in rows:
-                content = {
-                    'song_id': row[0],
-                    'song_name': row[1],
-                    'artist_name': row[2],
-                    'issue_date': row[3]
-                }
-                like_songs.append(content)
+            dislike_songs = find_usrSong(u_id, 0)
+            like_songs = find_usrSong(u_id, 1)
             
-            return JsonResponse({"success": True, "like": like_songs, "dislike": dislike_songs}, json_dumps_params={'ensure_ascii': True}) 
+            dislike_tags = find_usrTag(u_id, 0)
+            like_tags = find_usrTag(u_id, 1)
+            
+            return JsonResponse({"success": True, "like": like_songs, "dislike": dislike_songs, 
+                                "like_tags":like_tags, "dislike_tags":dislike_tags}, json_dumps_params={'ensure_ascii': True}) 
 
         except KeyError as e:
             # 홈으로 리다이랙트
@@ -76,7 +49,40 @@ def index(request):
             # 홈으로 리다이랙트
             return JsonResponse({"success": False, "error": str(type(e))})
 
-    
+#region 사용자_노래
+def find_usrSong(u_id, isLike):
+    conn = sqlite3.connect('data.db')
+    cur = conn.cursor()
+    query = f"""
+        select a.id, a.song_name, a.artist_name_basket, a.issue_date
+        from song_meta a, usr_song b
+        where b.u_id = {u_id} and a.id = b.song_id and b.isLike={isLike}
+    """
+    cur.execute(query)
+    song_list = []
+    for row in cur.fetchall():
+        content = {
+            'song_id': row[0],
+            'song_name': row[1],
+            'artist_name': row[2],
+            'issue_date': row[3]
+        }
+        song_list.append(content)
+    return song_list
+#endregion
+
+#region 사용자_장르(태그)
+def find_usrTag(u_id, isLike):
+    conn = sqlite3.connect('data.db')
+    cur = conn.cursor()
+
+    cur.execute(f"select gnr_name from usr_gnr where u_id={u_id} and isLike={isLike}")
+    tag_list = []
+    for row in cur.fetchall():
+        tag_list.append(row[0])
+    return tag_list
+#endregion
+
 #region Auth
 @method_decorator(csrf_exempt, name='dispatch')
 def register(request):
