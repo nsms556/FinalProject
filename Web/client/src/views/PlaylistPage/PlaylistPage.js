@@ -3,8 +3,8 @@ import {Card, CardHeader, Container, Row} from "reactstrap";
 
 import axios from "axios";
 
-import Header from "../../components/Headers/Header";
-import SongInfo from "../../components/SongInfo";
+import Header from "components/Headers/Header.js";
+import SongInfo from "components/SongInfo.js";
 
 import MakePlaylist from "./Sections/MakePlaylist";
 

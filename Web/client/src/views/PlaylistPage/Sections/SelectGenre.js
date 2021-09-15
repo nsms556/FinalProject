@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {Alert, Button, CardBody, CardHeader, Table} from "reactstrap";
 
-import Polarizing from "../../../components/Polarizing";
+import Polarizing from "components/Polarizing.js";
 
 
 const SelectGenre = (props) => {

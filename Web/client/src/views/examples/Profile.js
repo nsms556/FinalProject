@@ -21,12 +21,11 @@ import React, {useEffect, useState} from "react";
 // reactstrap components
 import {Card, CardHeader, Col, Container, Row} from "reactstrap";
 
-// core components
-import UserHeader from "components/Headers/UserHeader.js";
-
 import axios from "axios";
 
-import SongInfo from "../../components/SongInfo";
+// core components
+import UserHeader from "components/Headers/UserHeader.js";
+import SongInfo from "components/SongInfo.js";
 
 
 const Profile = () => {

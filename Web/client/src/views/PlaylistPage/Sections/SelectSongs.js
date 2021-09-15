@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Alert, Button, CardBody, CardHeader} from "reactstrap";
 
-import SongInfo from "../../../components/SongInfo";
+import SongInfo from "components/SongInfo.js";
 
 
 const SelectGenre = (props) => {
