@@ -11,6 +11,7 @@ import {
     LikeOutlined
 } from "@ant-design/icons";
 
+axios.defaults.withCredentials = true;
 
 const Polarizing = (props) => {
 

@@ -5,6 +5,7 @@ import axios from "axios";
 import SelectGenre from "./SelectGenre";
 import SelectSongs from "./SelectSongs";
 
+axios.defaults.withCredentials = true;
 
 function MakePlaylist() {
 

@@ -8,6 +8,7 @@ import SongInfo from "components/SongInfo.js";
 
 import MakePlaylist from "./Sections/MakePlaylist";
 
+axios.defaults.withCredentials = true;
 
 function PlaylistPage() {
 

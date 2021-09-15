@@ -2,6 +2,7 @@ import axios from "axios";
 
 import {AUTH_USER, LOGIN_USER, LOGOUT_USER, REGISTER_USER} from './types';
 
+axios.defaults.withCredentials = true;
 
 export function auth() {
 

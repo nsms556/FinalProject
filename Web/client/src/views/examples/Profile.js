@@ -27,6 +27,7 @@ import axios from "axios";
 import UserHeader from "components/Headers/UserHeader.js";
 import SongInfo from "components/SongInfo.js";
 
+axios.defaults.withCredentials = true;
 
 const Profile = () => {
 
