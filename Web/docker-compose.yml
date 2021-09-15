@@ -1,12 +1,7 @@
 version: "3.7"
 services:
   django_web:
-    # 웹 애플리케이션 설정
-    image: bmofinnjake08/django_web:0.1.5
+    image: bmofinnjake08/django_web:0.2
+    command: python manage.py runserver 0.0.0.0:8000
     ports: 
-      - "8000:8000"
-    
-  react_web:
-    image: bmofinnjake08/react_web
-    ports:
-      - "3000:3000"
+      - 8000:8000
