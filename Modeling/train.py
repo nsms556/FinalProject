@@ -4,7 +4,6 @@ import argparse
 
 # Data library
 import numpy as np
-import pandas as pd
 
 # Models
 from Models.autoencoder import AutoEncoderHandler
@@ -19,6 +18,7 @@ from Utils.preprocessing import song_filter_by_freq, tags_encoding
 
 if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
+    parser.add_argument('-train_data', type=str, help='Train Dataset File Path', default=train_file_path)
     parser.add_argument('-dimension', type=int, help="hidden layer dimension", default=450)
     parser.add_argument('-epochs', type=int, help="total epochs", default=40)
     parser.add_argument('-batch_size', type=int, help="batch size", default=256)
@@ -31,12 +31,12 @@ if __name__ == '__main__' :
     args = parser.parse_args()
 
     print('Load data')
-    train_data = load_json(train_file_path)
+    train_data = load_json(args.train_data)
     question_data = load_json(question_file_path)
     answer_data = load_json(answer_file_path)
 
-    train_dataset = SongTagDataset(pd.read_json(train_file_path))
-    question_dataset = SongTagDataset(pd.read_json(question_file_path))
+    train_dataset = SongTagDataset(train_data)
+    question_dataset = SongTagDataset(train_data)
 
     print('Create Embedding Handlers')
     autoencoder_handler = AutoEncoderHandler()
@@ -49,17 +49,17 @@ if __name__ == '__main__' :
         song_filter_by_freq(train_data, args.freq_thr, song2id_file_path, id2song_file_path)
 
     autoencoder_handler.train_autoencoder(train_dataset, id2song_file_path, id2tag_file_path, question_dataset, answer_file_path, args)
-
     autoencoder_handler.save_model(autoencoder_model_path)
     autoencoder_handler.export_encoder_layer(autoencoder_encoder_layer_path)
 
-    word2vec_handler.train_vectorizer(train_file_path, genre_meta_file_path, True)
+    word2vec_handler.train_vectorizer(train_data, genre_meta_file_path, True)
     word2vec_handler.vectorizer.save_weights(vectorizer_weights_path)
 
-    plylst_emb = autoencoder_handler.autoencoder_plylsts_embeddings(train_data, False, True)
-    plylst_emb_gnr = autoencoder_handler.autoencoder_plylsts_embeddings(train_data, True, True)
-    plylst_w2v_emb = word2vec_handler.get_plylsts_embeddings(train_data, train=True)
-    
-    np.save(plylst_emb_path, plylst_emb)
-    np.save(plylst_emb_gnr_path, plylst_emb_gnr)
-    np.save(plylst_w2v_emb_path, plylst_w2v_emb)
+    print('Make plylst_emb...')
+    np.save(plylst_emb_path, autoencoder_handler.autoencoder_plylsts_embeddings(train_data, False, True))
+
+    print('Make plylst_emb_gnr...')
+    np.save(plylst_emb_gnr_path, autoencoder_handler.autoencoder_plylsts_embeddings(train_data, True, True))
+
+    print('Make plylst_w2v_emb...')
+    np.save(plylst_w2v_emb_path, word2vec_handler.get_plylsts_embeddings(train_data, train=True))

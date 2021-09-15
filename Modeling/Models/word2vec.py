@@ -1,5 +1,5 @@
 # Visualization library
-# from tqdm import tqdm
+from tqdm import tqdm
 
 # Data library
 import numpy as np
@@ -11,7 +11,7 @@ from gensim.models import Word2Vec
 
 # Utils
 from Utils.file import load_json
-from Utils.static import *
+from Utils.static import vectorizer_weights_path, plylst_w2v_emb_path
 
 
 class Kakao_Tokenizer :
@@ -113,7 +113,7 @@ class Word2VecHandler :
         if model_path != None :
             self.vectorizer.load_model(model_path)
 
-    def make_input4tokenizer(self, train_file_path, genre_file_path):
+    def make_input4tokenizer(self, train_data, genre_file_path):
         def _wv_genre(genre):
             genre_dict = dict()
             for code, value in genre:
@@ -137,8 +137,6 @@ class Word2VecHandler :
             return genre_sentences
 
         try:
-            playlists = load_json(train_file_path)
-
             genre_all = load_json(genre_file_path)
             genre_all_lists = []
             for code, gnr in genre_all.items():
@@ -148,7 +146,8 @@ class Word2VecHandler :
             genre_stc = _wv_genre(genre_all_lists)
 
             sentences = []
-            for playlist in playlists:
+            plylsts = pd.DataFrame(train_data)
+            for playlist in train_data:
                 title_stc = playlist['plylst_title']
                 tag_stc = ' '.join(playlist['tags'])
                 date_stc = ' '.join(playlist['updt_date'][:7].split('-'))
@@ -161,24 +160,23 @@ class Word2VecHandler :
 
         return sentences
 
-    def train_vectorizer(self, train_file_path, genre_file_path, exist_tags_only=True):
+    def train_vectorizer(self, train_data, genre_file_path, exist_tags_only=True):
         print('Make Sentences')
-        sentences = self.make_input4tokenizer(train_file_path, genre_file_path)
+        sentences = self.make_input4tokenizer(train_data, genre_file_path)
         if not sentences:
             raise Exception('Sentences not found')
         
         print('Tokenizing')
         if exist_tags_only :    # kakao filtered #
-            tokenized_sentences = self.tokenizer.sentences_to_tokens(sentences, self.tokenizer.get_all_tags(pd.read_json(train_file_path)))
+            tokenized_sentences = self.tokenizer.sentences_to_tokens(sentences, self.tokenizer.get_all_tags(pd.DataFrame(train_data)))
         else :                  # kakao non-filtered #
             tokenized_sentences = self.tokenizer.sentences_to_tokens(sentences)
 
-        print("start train_vectorizer.... name : {}".format(vectorizer_weights_path))
-
+        print("Train vectorizer...")
+        print("Save Path : {}".format(vectorizer_weights_path))
         self.vectorizer = Str2Vec(tokenized_sentences, size=200, window=5, min_count=1, workers=8, sg=1, hs=1)
 
-    def get_plylsts_embeddings(self,playlist_data, exist=None, train=True):
-        print('saving embeddings')
+    def get_plylsts_embeddings(self, playlist_data, exist=None, train=True):
         if train :
             t_plylst_title_tag_emb = {}  # plylst_id - vector dictionary
         else :
