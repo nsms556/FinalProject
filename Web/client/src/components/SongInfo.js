@@ -49,6 +49,19 @@ const SongInfo = (props) => {
     };
 
     const renderSongs = props.song_list && props.song_list.map((song, index) => {
+
+        let artist = [];
+        if (song.artist.split) {
+            const tokens = song.artist.split('\'');
+            for (let token of tokens) {
+                if (!(token === "[" || token === ", " || token === "]")) {
+                    artist.push(token);
+                }
+            }
+        } else {
+            artist = song.artist;
+        }
+
         return (
             <tr key={index}>
                 <th scope="row">
@@ -57,7 +70,7 @@ const SongInfo = (props) => {
                     </span>
                 </th>
                 <td>
-                    {song.artist}
+                    {artist.join(", ")}
                 </td>
                 {
                     props.btn_type !== "delete" ?
