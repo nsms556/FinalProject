@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
 import axios from "axios";
 
@@ -20,6 +20,27 @@ const Polarizing = (props) => {
     const [Like, setLike] = useState(false);
     const [Dislike, setDislike] = useState(false);
 
+    useEffect(() => {
+
+        const state = checkPolarized(props.id);
+
+        if (state === "Like") {
+            setLikeBtn();
+        } else if (state === "Dislike") {
+            setDislikeBtn();
+        }
+    }, []);
+
+    const checkPolarized = (id) => {
+
+        if (props.like_list && props.like_list.includes(id)) {
+            return "Like";
+        } else if (props.dislike_list && props.dislike_list.includes(id)) {
+            return "Dislike";
+        }
+        return null;
+    };
+
     const checkPolarizing = (id, like, dislike) => {
 
         // Like 또는 Dislike 클릭하여 선택 시: false
@@ -28,24 +49,45 @@ const Polarizing = (props) => {
         props.addList(id, (like === 'false') ? 'like' : ((dislike === 'false') ? 'dislike' : null));
     };
 
-    const onClickLikes = (e) => {
+    const setLikeBtn = () => {
 
         if (Dislike) {
             setDislike(!Dislike);
         }
         setLike(!Like);
 
-        checkPolarizing(props.id, e.currentTarget.value, null);
-    };
+        if (props.is_search) {
+            onSearchPageFunc(1);
+        }
+    }
 
-    const onClickDislikes = (e) => {
+    const setDislikeBtn = () => {
 
         if (Like) {
             setLike(!Like);
         }
         setDislike(!Dislike);
 
+        if (props.is_search) {
+            onSearchPageFunc(0);
+        }
+    }
+
+    const onClickLikes = (e) => {
+
+        setLikeBtn();
+        checkPolarizing(props.id, e.currentTarget.value, null);
+    };
+
+    const onClickDislikes = (e) => {
+
+        setDislikeBtn();
         checkPolarizing(props.id, null, e.currentTarget.value);
+    };
+
+    const onMouseOver = () => {
+
+        setBtnMouseOver(!BtnMouseOver);
     };
 
     const onRemoveSong = () => {
@@ -65,9 +107,24 @@ const Polarizing = (props) => {
             })
     }
 
-    const onMouseOver = () => {
+    const onSearchPageFunc = (state) => {
 
-        setBtnMouseOver(!BtnMouseOver);
+        const song_data = {
+            song_id: parseInt(props.id),
+            isLike: state
+        };
+
+        axios.post('http://127.0.0.1:8000/users/select_song', song_data)
+            .then(response => {
+                if (response.data) {
+                    window.location.replace("/admin/search");
+                } else {
+                    alert('노래 추가에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            })
     };
 
     return (

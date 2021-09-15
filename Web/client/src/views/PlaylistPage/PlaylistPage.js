@@ -18,6 +18,9 @@ function PlaylistPage() {
     const [ViewPage, setViewPage] = useState(false);
 
     useEffect(() => {
+
+        setViewPage(false);
+
         trackPromise(
             axios.get('http://127.0.0.1:8000/playlist/songs')
                 .then(response => {
@@ -41,7 +44,10 @@ function PlaylistPage() {
             <Container className="mt--7" fluid>
                 <Row>
                     <div className="col">
-                        <LoadingIndicator/>
+                        {
+                            !ViewPage &&
+                            <LoadingIndicator/>
+                        }
                         {
                             ViewPage &&
                             <Card className="shadow">
