@@ -8,7 +8,18 @@ import SelectSongs from "./SelectSongs";
 
 function MakePlaylist() {
 
-    const [UserData, setUserData] = useState({like: {}, dislike: {}});
+    const [UserData, setUserData] = useState({
+        like: {
+            id: 0,
+            plylst_title: "",
+            updt_date: "2012-09-29 01:57:26.000"
+        },
+        dislike: {
+            id: 1,
+            plylst_title: "",
+            updt_date: "2012-09-29 01:57:26.000"
+        }
+    });
 
     const [ViewGenre, setViewGenre] = useState(true);
     const [ViewSongs, setViewSongs] = useState(false);
@@ -35,7 +46,7 @@ function MakePlaylist() {
 
         setUserData(UserData);
 
-        axios.post('http://127.0.0.1:8000/playlist/recommend', UserData)
+        axios.post('http://127.0.0.1:8000/playlist/recommend', [UserData])
             .then(response => {
                 if (response.data && response.data.success) {
                     window.location.replace("/admin/playlist");
