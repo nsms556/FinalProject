@@ -50,7 +50,7 @@ function MakePlaylist() {
         axios.post('http://127.0.0.1:8000/playlist/recommend', [UserData])
             .then(response => {
                 if (response.data && response.data.success) {
-                    window.location.replace("/admin/playlist");
+                    window.location.reload();
                 } else {
                     alert('데이터 전송에 실패했습니다.');
                 }
