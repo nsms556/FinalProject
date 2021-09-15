@@ -77,7 +77,7 @@ const Polarizing = (props) => {
                         <button className={BtnMouseOver ? "btn btn-icon btn-default" : "btn btn-icon btn-secondary"}
                                 type="button" onMouseEnter={onMouseOver} onMouseLeave={onMouseOver}
                                 onClick={onRemoveSong}>
-                                <span key="comment-basic-like">
+                                <span key="button-basic-delete">
                                     {
                                         BtnMouseOver ? (<DeleteFilled/>) : (<DeleteOutlined/>)
                                     }
@@ -88,7 +88,7 @@ const Polarizing = (props) => {
                         <>
                             <button className={Like ? "btn btn-icon btn-danger" : "btn btn-icon btn-secondary"}
                                     type="button" value={Like} onClick={onClickLikes}>
-                                <span key="comment-basic-like">
+                                <span key="button-basic-like">
                                     {
                                         Like ? (<LikeFilled/>) : (<LikeOutlined/>)
                                     }
@@ -96,7 +96,7 @@ const Polarizing = (props) => {
                             </button>
                             <button className={Dislike ? "btn btn-icon btn-default" : "btn btn-icon btn-secondary"}
                                     type="button" value={Dislike} onClick={onClickDislikes}>
-                                <span key="comment-basic-dislike">
+                                <span key="button-basic-dislike">
                                     {
                                         Dislike ? (<DislikeFilled/>) : (<DislikeOutlined/>)
                                     }
