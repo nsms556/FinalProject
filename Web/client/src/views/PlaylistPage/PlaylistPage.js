@@ -33,7 +33,7 @@ function PlaylistPage() {
         ).then(_ => {
             setViewPage(true);
         })
-    }, [SongList]);
+    }, []);
 
     return (
         <>
