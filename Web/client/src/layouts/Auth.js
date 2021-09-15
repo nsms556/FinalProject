@@ -23,7 +23,7 @@ import {Redirect, Route, Switch, useLocation} from "react-router-dom";
 import {Container, Row} from "reactstrap";
 
 import routes from "routes.js";
-import AuthNavbar from "../components/Navbars/AuthNavbar";
+import AuthNavbar from "components/Navbars/AuthNavbar.js";
 
 
 const Auth = () => {

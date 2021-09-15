@@ -1,8 +1,8 @@
 import React, {useState} from "react";
 import {Card, Container, Row} from "reactstrap";
 
-import Header from "../../components/Headers/Header";
-import SongInfo from "../../components/SongInfo";
+import Header from "components/Headers/Header.js";
+import SongInfo from "components/SongInfo.js";
 
 import SearchBox from "./Sections/SearchBox";
 
