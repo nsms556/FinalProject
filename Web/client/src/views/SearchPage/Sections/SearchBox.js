@@ -6,6 +6,7 @@ import axios from "axios";
 import {Tooltip} from "antd";
 import {SearchOutlined} from "@ant-design/icons";
 
+axios.defaults.withCredentials = true;
 
 function SearchBox(props) {
 

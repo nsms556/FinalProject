@@ -15,6 +15,7 @@ def index(request):
     if request.method == 'GET':
         try:
             u_id = request.session['u_id']
+            print(f'user{u_id}: 유저페이지')
             conn = sqlite3.connect('data.db')
             cur = conn.cursor()
             query = f"""
@@ -59,6 +60,8 @@ def index(request):
     elif request.method == 'POST':
         try:
             u_id = request.session['u_id']
+            print(f"user{u_id} 유저페이지 편집")
+
             body = json.loads(request.body.decode('utf-8'))
             conn = sqlite3.connect('data.db')
             cur = conn.cursor()
@@ -90,7 +93,6 @@ def register(request):
             # Create user and save to the database
             user = User.objects.create_user(username=username, password=password)
             user.save()
-            request.session['u_id'] = user.pk
             # return redirect('index')
             return JsonResponse({'success':True, 'name':username}, json_dumps_params={'ensure_ascii': True})
         
@@ -112,7 +114,11 @@ def signin(request):
             user = authenticate(request, username = username, password = password)
 
             if user is not None:
+                print(request) # check request type
                 request.session['u_id'] = user.pk
+                request.session.modified = True
+                print(f"user{request.session['u_id']}: 로그인")
+
                 return JsonResponse({'success':True, 'status': '로그인 성공'}, json_dumps_params={'ensure_ascii': True})
             else:
                 return JsonResponse({'success':False, 'status': '로그인 실패'}, json_dumps_params={'ensure_ascii': True})
@@ -122,11 +128,16 @@ def signin(request):
 
 def signout(request):
     # 이미 로그인되있는 상태인지 예외처리 필요
-    u_id = request.session['u_id']
+    # u_id = request.session['u_id']
+    # print(f"user{request.session['u_id']}: 로그아웃")
+    print(request) # check request type
+    
     logout(request)
-    return JsonResponse({'success':True, 'status': f'{u_id} 로그아웃 하였습니다'}, json_dumps_params={'ensure_ascii': True})
+    return redirect('/playlist/')
+    # return JsonResponse({'success':True}, json_dumps_params={'ensure_ascii': True})
 #endregion
 
+#region 대비용 경로
 # 장르 호/불호 입력
 @method_decorator(csrf_exempt, name='dispatch')
 def SelectGnr(request):
@@ -191,3 +202,4 @@ def SelectSong(request):
             return JsonResponse({"success":True, "song": body["song_id"]}, json_dumps_params={'ensure_ascii': True}) 
         except KeyError as e:
             return JsonResponse({"success": False, "error": str(type(e))})
+#endregion

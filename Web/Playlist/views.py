@@ -22,9 +22,7 @@ from Models.recommender import Recommender
 
 from Playlist.recommend import inference
 
-#region [MODEL]
 model = Recommender()
-#endregion
 
 # Create your views here.
 @method_decorator(csrf_exempt, name='dispatch')
@@ -36,6 +34,8 @@ def index(request):
     # 노래 검색
     elif request.method == 'POST':
         try:
+            print(request)
+            print(f"user{request.session['u_id']}: 사용자 노래 검색중...")
             body = json.loads(request.body.decode('utf-8'))
             type = body['type']
             word = body['word']
@@ -73,6 +73,7 @@ def index(request):
 def detail(request):
     if request.method == 'POST':
         try:
+            print(f"user{request.session['u_id']}: 노래 재생...")
             body = json.loads(request.body.decode('utf-8'))
 
             playlink = "https://www.youtube.com/results?search_query="
@@ -84,7 +85,7 @@ def detail(request):
         except (KeyError, JSONDecodeError, ValueError) as e:
             return JsonResponse({'success':False}, json_dumps_params={'ensure_ascii': True})
 
-# 추천시 입력하는 정보(태그, 노래) 사용자_장르, 사용자_노래 테이블에 저장
+#region 추천시 입력하는 정보(태그, 노래) 사용자_장르, 사용자_노래 테이블에 저장
 def insert_info(u_id, input_list, isLike):
     conn = sqlite3.connect('data.db')
     cur = conn.cursor()
@@ -101,6 +102,7 @@ def insert_info(u_id, input_list, isLike):
         songs.append((u_id, song_id, isLike))
     cur.executemany("INSERT INTO usr_song values (?, ?, ?)", songs)
     conn.commit() 
+#endregion
 
 @method_decorator(csrf_exempt, name='dispatch')
 def show_inference(request):
@@ -109,11 +111,10 @@ def show_inference(request):
     
     if request.method == 'POST':
         try:
-            conn = sqlite3.connect('data.db')
-            cur = conn.cursor()
-
             body = json.loads(request.body.decode('utf-8'))
+            print(request)
             u_id = request.session['u_id']
+            print(f"user{u_id}: 추천중...")
 
             like = body[0]["like"]
             dislike = body[0]["dislike"]
@@ -135,6 +136,7 @@ def show_songs(request):
 
     try:
         u_id = request.session['u_id']
+        print(f"user{u_id}: 추천 완료")
         result = load_json(result_file_base.format(u_id))
         
         song_list = []
@@ -157,7 +159,7 @@ def show_songs(request):
                     'dtl_gnr': row[7]
                 }
                 song_list.append(content)
-        
+        print({'success':True, 'tag_list': result['tags'], 'song_list': song_list})
         return JsonResponse({'success':True, 'tag_list': result['tags'], 'song_list': song_list}, json_dumps_params={'ensure_ascii': True})
     except (KeyError, JSONDecodeError, ValueError) as e:
         return JsonResponse({'success':False, 'ouput': e}, json_dumps_params={'ensure_ascii': True})
