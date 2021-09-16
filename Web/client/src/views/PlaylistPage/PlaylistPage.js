@@ -10,11 +10,6 @@ import SongInfo from "components/SongInfo.js";
 import MakePlaylist from "./Sections/MakePlaylist";
 
 
-axios.defaults.withCredentials = true;
-
-
-const host = '127.0.0.1'
-
 function PlaylistPage() {
 
     const [SongList, setSongList] = useState(null);
@@ -25,7 +20,7 @@ function PlaylistPage() {
         setViewPage(false);
 
         trackPromise(
-            axios.get(`http://${host}:8000/playlist/songs`)
+            axios.get('http://127.0.0.1:8000/playlist/songs')
                 .then(response => {
                     if (response.data) {
                         setSongList(response.data.song_list);
