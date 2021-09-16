@@ -3,6 +3,7 @@ import logging
 import json
 from json.decoder import JSONDecodeError
 import datetime as dt
+import re
 
 from django.urls import reverse
 from django.shortcuts import redirect, render
@@ -57,12 +58,13 @@ def index(request):
                 content = {
                         'song_id': row[0],
                         'song_name': row[1],
-                        'artist': row[2],
+                        'artist': (row[2][2:-2].replace("'", "")).split(','),
                         'album_name': row[3],
                         'album_id': row[4],
                         'issue_date': row[5]
                     }
                 output.append(content)
+            print(output)
             return JsonResponse({'success':True, 'output':output}, json_dumps_params={'ensure_ascii': True})
         except KeyError:
             return # redirect home
@@ -151,7 +153,7 @@ def show_songs(request):
                 content = {
                     'song_id': row[0],
                     'song_name': row[1],
-                    'artist': row[2],
+                    'artist': (row[2][2:-2].replace("'", "")).split(','),
                     'album_id': row[3],
                     'album_name': row[4],
                     'issue_date': row[5],
