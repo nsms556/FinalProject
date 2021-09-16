@@ -64,7 +64,7 @@ def index(request):
                         'issue_date': row[5]
                     }
                 output.append(content)
-            print(output)
+            
             return JsonResponse({'success':True, 'output':output}, json_dumps_params={'ensure_ascii': True})
         except KeyError:
             return # redirect home
