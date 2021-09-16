@@ -9,7 +9,7 @@ import SelectSongs from "./SelectSongs";
 axios.defaults.withCredentials = true;
 var host = '127.0.0.1'
 
-function MakePlaylist() {
+function MakePlaylist(props) {
 
     const [UserData, setUserData] = useState({
         like: {
@@ -44,6 +44,8 @@ function MakePlaylist() {
 
     const onFinished = (LikeSong, DislikeSong) => {
 
+        props.setViewPage(false);
+        
         UserData["like"]["songs"] = LikeSong;
         UserData["dislike"]["songs"] = DislikeSong;
 
