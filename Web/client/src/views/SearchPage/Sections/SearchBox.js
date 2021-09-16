@@ -7,6 +7,7 @@ import {Tooltip} from "antd";
 import {SearchOutlined} from "@ant-design/icons";
 
 axios.defaults.withCredentials = true;
+var host = '127.0.0.1'
 
 function SearchBox(props) {
 
@@ -33,7 +34,7 @@ function SearchBox(props) {
             word: Words
         }
 
-        axios.post('http://127.0.0.1:8000/playlist/', search_data)
+        axios.post(`http://${host}:8000/playlist/`, search_data)
             .then(response => {
                 if (response.data) {
                     props.getSongList(response.data.output);

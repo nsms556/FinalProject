@@ -28,6 +28,7 @@ import UserHeader from "components/Headers/UserHeader.js";
 import SongInfo from "components/SongInfo.js";
 
 axios.defaults.withCredentials = true;
+var host = '127.0.0.1'
 
 const Profile = () => {
 
@@ -36,7 +37,7 @@ const Profile = () => {
 
     useEffect(() => {
 
-        axios.get('http://127.0.0.1:8000/users/')
+        axios.get(`http://${host}:8000/users/`)
             .then(response => {
                 if (response.data) {
                     setLikeList(response.data.like);

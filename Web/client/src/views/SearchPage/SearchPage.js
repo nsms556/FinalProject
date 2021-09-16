@@ -9,6 +9,8 @@ import SongInfo from "components/SongInfo.js";
 
 import SearchBox from "./Sections/SearchBox";
 
+axios.defaults.withCredentials = true;
+var host = '127.0.0.1'
 
 function SearchPage() {
 
@@ -20,7 +22,7 @@ function SearchPage() {
     useEffect(() => {
 
         trackPromise(
-            axios.get('http://127.0.0.1:8000/users/')
+            axios.get(`http://${host}:8000/users/`)
                 .then(response => {
                     if (response.data) {
                         setLikeSongList(response.data.like);

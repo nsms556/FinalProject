@@ -3,10 +3,11 @@ import axios from "axios";
 import {AUTH_USER, LOGIN_USER, LOGOUT_USER, REGISTER_USER} from './types';
 
 axios.defaults.withCredentials = true;
+var host = '127.0.0.1'
 
 export function auth() {
 
-    const request = axios.get('http://127.0.0.1:8000/admin')
+    const request = axios.get(`http://${host}:8000/admin`)
         .then(response => response.data);
 
     return {
@@ -18,7 +19,7 @@ export function auth() {
 
 export function loginUser(dataToSubmit) {
 
-    const request = axios.post('http://127.0.0.1:8000/users/login', dataToSubmit)
+    const request = axios.post(`http://${host}:8000/users/login`, dataToSubmit)
         .then(response => response.data);
 
     return {
@@ -30,7 +31,7 @@ export function loginUser(dataToSubmit) {
 
 export function logoutUser() {
 
-    const request = axios.get('http://127.0.0.1:8000/users/logout')
+    const request = axios.get(`http://${host}:8000/users/logout`)
         .then(response => response.data);
 
     return {
@@ -42,7 +43,7 @@ export function logoutUser() {
 
 export function registerUser(dataToSubmit) {
 
-    const request = axios.post('http://127.0.0.1:8000/users/register', dataToSubmit)
+    const request = axios.post(`http://${host}:8000/users/register`, dataToSubmit)
         .then(response => response.data);
 
     return {

@@ -12,6 +12,7 @@ import {
 } from "@ant-design/icons";
 
 axios.defaults.withCredentials = true;
+var host = '127.0.0.1'
 
 const Polarizing = (props) => {
 
@@ -94,7 +95,7 @@ const Polarizing = (props) => {
 
         const song_id = {song_id: parseInt(props.id)};
 
-        axios.post('http://127.0.0.1:8000/users/', song_id)
+        axios.post(`http://${host}:8000/users/`, song_id)
             .then(response => {
                 if (response.data) {
                     window.location.replace("/admin/user-profile");
@@ -114,7 +115,7 @@ const Polarizing = (props) => {
             isLike: state
         };
 
-        axios.post('http://127.0.0.1:8000/users/select_song', song_data)
+        axios.post(`http://${host}:8000/users/select_song`, song_data)
             .then(response => {
                 if (response.data) {
                     window.location.replace("/admin/search");
