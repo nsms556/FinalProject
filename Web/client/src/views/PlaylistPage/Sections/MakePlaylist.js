@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import {trackPromise} from "react-promise-tracker";
 
 import axios from "axios";
 
@@ -6,7 +7,7 @@ import SelectGenre from "./SelectGenre";
 import SelectSongs from "./SelectSongs";
 
 
-function MakePlaylist() {
+function MakePlaylist(props) {
 
     const [UserData, setUserData] = useState({
         like: {
@@ -41,22 +42,26 @@ function MakePlaylist() {
 
     const onFinished = (LikeSong, DislikeSong) => {
 
+        props.setViewPage(false);
+
         UserData["like"]["songs"] = LikeSong;
         UserData["dislike"]["songs"] = DislikeSong;
 
         setUserData(UserData);
 
-        axios.post('http://127.0.0.1:8000/playlist/recommend', [UserData])
-            .then(response => {
-                if (response.data && response.data.success) {
-                    window.location.reload();
-                } else {
-                    alert('데이터 전송에 실패했습니다.');
-                }
-            })
-            .catch(error => {
-                console.log(error);
-            })
+        trackPromise(
+            axios.post('http://localhost:3000/admin/playlist', [UserData])
+                .then(response => {
+                    if (response.data && response.data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('데이터 전송에 실패했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+        )
     };
 
     return (
