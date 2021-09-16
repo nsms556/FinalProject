@@ -16,17 +16,26 @@
 
 */
 
+import React from "react";
+
 // reactstrap components
-import {Container} from "reactstrap";
+import {Card, CardHeader, Container} from "reactstrap";
 
 import Header from "components/Headers/Header.js";
 
 
 const Index = () => {
+
     return (
         <>
             <Header/>
-            <Container className="mt--7" fluid/>
+            <Container className="mt--7" fluid>
+                <Card className="shadow">
+                    <CardHeader className="border-0 text-center">
+                        <img alt="programmers" src="/images/mussg.gif"/>
+                    </CardHeader>
+                </Card>
+            </Container>
         </>
     );
 };
