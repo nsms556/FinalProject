@@ -7,11 +7,6 @@ import SelectGenre from "./SelectGenre";
 import SelectSongs from "./SelectSongs";
 
 
-axios.defaults.withCredentials = true;
-
-
-const host = '127.0.0.1'
-
 function MakePlaylist(props) {
 
     const [UserData, setUserData] = useState({
@@ -55,7 +50,7 @@ function MakePlaylist(props) {
         setUserData(UserData);
 
         trackPromise(
-            axios.post(`http://${host}:8000/playlist/recommend`, [UserData])
+            axios.post('http://localhost:3000/admin/playlist', [UserData])
                 .then(response => {
                     if (response.data && response.data.success) {
                         window.location.reload();
