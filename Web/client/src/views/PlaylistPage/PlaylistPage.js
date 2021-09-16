@@ -1,11 +1,10 @@
 import React, {useEffect, useState} from "react";
-import {Card, CardHeader, Container, Row} from "reactstrap";
+import {Alert, Card, CardHeader, Container, Row} from "reactstrap";
 import {trackPromise} from 'react-promise-tracker';
 
 import axios from "axios";
 
 import Header from "components/Headers/Header.js";
-import LoadingIndicator from "components/LoadingIndicator";
 import SongInfo from "components/SongInfo.js";
 
 import MakePlaylist from "./Sections/MakePlaylist";
@@ -45,7 +44,12 @@ function PlaylistPage() {
                     <div className="col">
                         {
                             !ViewPage &&
-                            <LoadingIndicator/>
+                            (
+                                <Alert color="secondary">
+                                    추천받은 곡을 확인하는 중입니다.<br/>
+                                    잠시만 기다려주세요. 😉
+                                </Alert>
+                            )
                         }
                         {
                             ViewPage &&
@@ -61,7 +65,7 @@ function PlaylistPage() {
                                             </>
                                         ) :
                                         (
-                                            <MakePlaylist/>
+                                            <MakePlaylist setViewPage={setViewPage}/>
                                         )
                                 }
                             </Card>
