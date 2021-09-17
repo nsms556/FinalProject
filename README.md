@@ -18,6 +18,9 @@
 - 곡 DB를 주기적으로 최신화하여 최신곡들도 추천 리스트에 추가
 - 노래를 들을 수 있는 페이지 or 서비스로 연결
 
+# 시연 영상
+[![음악 편식기 (시연 최종)](http://img.youtube.com/vi/w3rwi_yA5TY/0.jpg)](https://youtu.be/w3rwi_yA5TY) 
+
 # 참조
 - 카카오 아레나 Melon Playlist Continuation
 - https://github.com/jjun0127/MelonRec
