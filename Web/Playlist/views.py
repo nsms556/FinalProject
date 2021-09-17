@@ -35,8 +35,7 @@ def index(request):
     # 노래 검색
     elif request.method == 'POST':
         try:
-            print(request)
-            print(f"user{request.session['u_id']}: 사용자 노래 검색중...")
+            print("노래 검색중...")
             body = json.loads(request.body.decode('utf-8'))
             type = body['type']
             word = body['word']
